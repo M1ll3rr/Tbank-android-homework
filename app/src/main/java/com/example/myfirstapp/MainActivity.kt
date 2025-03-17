@@ -66,87 +66,6 @@ fun main() {
     }
 }
 
-abstract class LibraryObject(val id: Int, val name: String, var access: Boolean) {
-    private val type: String = when (this) {
-        is Book -> "Книга"
-        is Newspaper -> "Газета"
-        is Disk -> "Диск"
-        else -> "Неизвестный тип"
-    }
-
-    override fun toString(): String {
-        return "$name доступна: ${if (access) "Да" else "Нет"}"
-    }
-
-    abstract fun getInfo()
-
-    fun getHome() {
-        if (type != "Газета") {
-            if (access) {
-                access = false
-                println("$type $id взяли домой")
-            }
-            else println("Предмет недоступен")
-        }
-        else println("Газету нельзя брать домой!")
-    }
-
-    fun readInside() {
-        if (type != "Диск") {
-            if (access) {
-                access = false
-                println("$type $id взяли в читальный зал")
-            }
-            else println("Предмет недоступен")
-        }
-        else println("Диск нельзя брать в читальный зал!")
-    }
-
-    fun returnItem() {
-        if (!access) {
-            access = true
-            println("$type $id вернули в библиотеку")
-        } else {
-            println("$type $id уже в библиотеке")
-        }
-    }
-}
-
-
-class Book(
-    id: Int,
-    name: String,
-    val author: String,
-    val numOfPage: Int,
-    access: Boolean = true
-    ) : LibraryObject(id, name, access) {
-    override fun getInfo() {
-        println("Книга: $name ($numOfPage стр.) автора: $author с id: $id доступна: ${if (access) "Да" else "Нет"}")
-    }
-}
-
-class Newspaper(
-    id: Int,
-    name: String,
-    val numOfPub: Int,
-    access: Boolean = true
-) : LibraryObject(id, name, access) {
-    override fun getInfo() {
-        println("Выпуск: $numOfPub газеты $name с id: $id доступен: ${if (access) "Да" else "Нет"}")
-    }
-}
-
-class Disk(
-    id: Int,
-    name: String,
-    val diskType: String,
-    access: Boolean = true
-) : LibraryObject(id, name, access) {
-    override fun getInfo() {
-        println("$diskType $name доступен: ${if (access) "Да" else "Нет"}")
-    }
-}
-
 fun showLibraryObjects(objectList: List<LibraryObject>) {
     for (index in objectList.indices) {
         println("${index + 1}: ${objectList[index]}")
@@ -186,8 +105,10 @@ fun handleItemActions(item: LibraryObject) {
         val action = readlnOrNull()?.toIntOrNull()
 
         when (action) {
-            1 -> item.getHome()
-            2 -> item.readInside()
+            1 -> if (item is HomeTakeable) item.getHome()
+            else println("${item.typeName} нельзя брать домой!")
+            2 -> if (item is InsideReadable) item.readInside()
+            else println("${item.typeName} нельзя брать в читальный зал!")
             3 -> item.getInfo()
             4 -> item.returnItem()
             5 -> return
