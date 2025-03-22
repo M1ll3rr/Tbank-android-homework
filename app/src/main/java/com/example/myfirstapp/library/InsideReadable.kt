@@ -1,4 +1,4 @@
-package com.example.myfirstapp
+package com.example.myfirstapp.library
 
 interface InsideReadable {
     fun readInside()

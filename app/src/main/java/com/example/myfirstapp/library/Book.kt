@@ -1,4 +1,4 @@
-package com.example.myfirstapp
+package com.example.myfirstapp.library
 
 class Book(
     id: Int,
@@ -6,7 +6,7 @@ class Book(
     val author: String,
     val numOfPage: Int,
     access: Boolean = true
-) : LibraryObject(id, name, access), InsideReadable, HomeTakeable {
+) : LibraryObject(id, name, access), InsideReadable, HomeTakeable, Digitizable {
     override val typeName = "Книга"
 
     override fun getInfo() {

@@ -1,4 +1,4 @@
-package com.example.myfirstapp
+package com.example.myfirstapp.library
 
 abstract class LibraryObject(val id: Int, val name: String, var access: Boolean) {
     abstract val typeName: String
