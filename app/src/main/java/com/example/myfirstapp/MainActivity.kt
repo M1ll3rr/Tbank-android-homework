@@ -7,7 +7,9 @@ import com.example.myfirstapp.library.Disk
 import com.example.myfirstapp.library.HomeTakeable
 import com.example.myfirstapp.library.InsideReadable
 import com.example.myfirstapp.library.LibraryObject
+import com.example.myfirstapp.library.Months
 import com.example.myfirstapp.library.Newspaper
+import com.example.myfirstapp.library.TypesOfDisk
 import com.example.myfirstapp.shops.BookShop
 import com.example.myfirstapp.shops.DiskShop
 import com.example.myfirstapp.shops.NewspaperShop
@@ -32,24 +34,24 @@ fun main() {
     )
 
     val newspaperList = mutableListOf<Newspaper>(
-        Newspaper(201, "The New York Times", 12345, "Январь"),
-        Newspaper(202, "The Washington Post", 67890, "Февраль"),
-        Newspaper(203, "Панорама города", 54321, "Март", false),
-        Newspaper(204, "Комсомольская прада", 98765, "Апрель"),
-        Newspaper(205, "Телесемь", 11223, "Май"),
-        Newspaper(206, "The Economist", 44556, "Июнь")
+        Newspaper(201, "The New York Times", 12345, Months.JANUARY.ruName),
+        Newspaper(202, "The Washington Post", 67890, Months.FEBRUARY.ruName),
+        Newspaper(203, "Панорама города", 54321, Months.MARCH.ruName, false),
+        Newspaper(204, "Комсомольская прада", 98765, Months.APRIL.ruName),
+        Newspaper(205, "Телесемь", 11223, Months.MAY.ruName),
+        Newspaper(206, "The Economist", 44556, Months.JUNE.ruName)
     )
 
     val diskList = mutableListOf<Disk>(
-        Disk(301, "Вестник", "CD"),
-        Disk(302, "Лесник", "CD"),
-        Disk(303, "Back in Black", "CD", false),
-        Disk(304, "Abbey Road", "CD"),
-        Disk(305, "Rumours", "CD"),
-        Disk(306, "Nevermind", "CD"),
-        Disk(307, "Матрица", "DVD", false),
-        Disk(308, "Начало", "DVD"),
-        Disk(309, "Интерстеллар", "DVD")
+        Disk(301, "Вестник", TypesOfDisk.CD.name),
+        Disk(302, "Лесник", TypesOfDisk.CD.name),
+        Disk(303, "Back in Black", TypesOfDisk.CD.name, false),
+        Disk(304, "Abbey Road", TypesOfDisk.CD.name),
+        Disk(305, "Rumours", TypesOfDisk.CD.name),
+        Disk(306, "Nevermind", TypesOfDisk.CD.name),
+        Disk(307, "Матрица", TypesOfDisk.DVD.name, false),
+        Disk(308, "Начало", TypesOfDisk.DVD.name),
+        Disk(309, "Интерстеллар", TypesOfDisk.DVD.name)
     )
 
     println("Добро пожаловать в библиотеку, что вы хотите сделать?")
