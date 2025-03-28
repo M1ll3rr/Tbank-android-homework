@@ -1,7 +1,7 @@
 package com.example.myfirstapp.library
 
 class Digitalizator<T : Digitizable> {
-    fun digitize(item: T, diskType: String = TypesOfDisk.CD.name): Disk {
+    fun digitize(item: T, diskType: TypesOfDisk = TypesOfDisk.CD): Disk {
         val disk = Disk(
             id = "1${item.id}".toInt(),
             name = "Цифровая версия ${item.name}",

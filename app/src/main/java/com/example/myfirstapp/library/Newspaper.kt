@@ -1,13 +1,16 @@
 package com.example.myfirstapp.library
 
+import com.example.myfirstapp.R
+
 class Newspaper(
     id: Int,
     name: String,
     val numOfPub: Int,
-    val monthOfPub: String,
+    val monthOfPub: Months,
     access: Boolean = true
 ) : LibraryObject(id, name, access), InsideReadable, Digitizable {
     override val typeName = "Газета"
+    override val iconId = R.drawable.diskicon
 
     override fun getInfo() {
         println("Выпуск №$numOfPub $monthOfPub газеты $name с id: $id доступен: ${if (access) "Да" else "Нет"}")
