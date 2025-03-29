@@ -8,7 +8,7 @@ class Book(
     val author: String,
     val numOfPage: Int,
     access: Boolean = true
-) : LibraryObject(id, name, access), InsideReadable, HomeTakeable, Digitizable {
+) : LibraryItem(id, name, access), InsideReadable, HomeTakeable, Digitizable {
     override val typeName = "Книга"
     override val iconId = R.drawable.bookicon
 

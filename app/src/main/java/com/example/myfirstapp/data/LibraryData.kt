@@ -2,7 +2,6 @@ package com.example.myfirstapp.data
 
 import com.example.myfirstapp.library.Book
 import com.example.myfirstapp.library.Disk
-import com.example.myfirstapp.library.LibraryObject
 import com.example.myfirstapp.library.Months
 import com.example.myfirstapp.library.Newspaper
 import com.example.myfirstapp.library.TypesOfDisk
