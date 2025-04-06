@@ -8,9 +8,9 @@ class Newspaper(
     val numOfPub: Int,
     val monthOfPub: Months,
     access: Boolean = true
-) : LibraryObject(id, name, access), InsideReadable, Digitizable {
+) : LibraryItem(id, name, access), InsideReadable, Digitizable {
     override val typeName = "Газета"
-    override val iconId = R.drawable.diskicon
+    override val iconId = R.drawable.newspapericon
 
     override fun getInfo() {
         println("Выпуск №$numOfPub $monthOfPub газеты $name с id: $id доступен: ${if (access) "Да" else "Нет"}")

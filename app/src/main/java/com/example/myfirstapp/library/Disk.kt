@@ -7,7 +7,7 @@ class Disk(
     name: String,
     val diskType: TypesOfDisk,
     access: Boolean = true
-) : LibraryObject(id, name, access), HomeTakeable {
+) : LibraryItem(id, name, access), HomeTakeable {
     override val typeName = "Диск"
     override val iconId = R.drawable.diskicon
 
