@@ -1,18 +1,19 @@
 package com.example.myfirstapp.recycler.adapters
 
 import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import android.widget.Toast
-import android.widget.Toast.LENGTH_SHORT
+import androidx.activity.result.ActivityResultLauncher
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myfirstapp.databinding.LibraryItemBinding
+import com.example.myfirstapp.activity.ItemActivity
+import com.example.myfirstapp.databinding.ListItemBinding
 import com.example.myfirstapp.library.LibraryItem
 import com.example.myfirstapp.recycler.utils.LibraryDiffUtil
 import com.example.myfirstapp.recycler.vh.LibraryViewHolder
 
-class LibraryAdapter: RecyclerView.Adapter<LibraryViewHolder>() {
+class LibraryAdapter(private val launcher: ActivityResultLauncher<Intent>): RecyclerView.Adapter<LibraryViewHolder>() {
     private val data = mutableListOf<LibraryItem>()
 
     override fun getItemCount() = data.size
@@ -26,7 +27,7 @@ class LibraryAdapter: RecyclerView.Adapter<LibraryViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LibraryViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val binding = LibraryItemBinding.inflate(inflater, parent, false)
+        val binding = ListItemBinding.inflate(inflater, parent, false)
         return LibraryViewHolder(binding).apply {
             binding.root.setOnClickListener {
                 handleLibraryClick(parent.context, adapterPosition)
@@ -37,9 +38,9 @@ class LibraryAdapter: RecyclerView.Adapter<LibraryViewHolder>() {
     private fun handleLibraryClick(context: Context, position: Int) {
         if (position != RecyclerView.NO_POSITION) {
             val item = data[position]
-            item.access = !item.access
-            notifyItemChanged(position, LibraryDiffUtil.LibraryAccessChange(item.access))
-            Toast.makeText(context, "Элемент с id ${item.id}", LENGTH_SHORT).show()
+            val intent = ItemActivity.createIntent(context, "view", item)
+            intent.putExtra("position", position)
+            launcher.launch(intent)
         }
     }
 
@@ -66,10 +67,4 @@ class LibraryAdapter: RecyclerView.Adapter<LibraryViewHolder>() {
             }
         }
     }
-
-    fun removeItem(position: Int) {
-        data.removeAt(position)
-        notifyItemRemoved(position)
-    }
-
 }

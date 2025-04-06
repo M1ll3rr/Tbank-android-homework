@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.ItemActivity"
+    android:fitsSystemWindows="true">
+
+
+    <ImageView
+        android:id="@+id/itemIcon"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_marginTop="64dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/id_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="64dp"
+        android:text="@string/id"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/access_title"
+        app:layout_constraintTop_toBottomOf="@+id/typeNameSwitcher" />
+
+    <TextView
+        android:id="@+id/access_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
+        android:text="@string/access"
+        android:textSize="16sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/id_title" />
+
+    <TextView
+        android:id="@+id/name_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="@string/name"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/access_title"
+        app:layout_constraintTop_toBottomOf="@+id/access_title" />
+
+    <TextView
+        android:id="@+id/parameter1_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="parameter1"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/name_title"
+        app:layout_constraintTop_toBottomOf="@+id/name_title" />
+
+    <TextView
+        android:id="@+id/parameter2_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:text="parameter2"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/parameter1_title"
+        app:layout_constraintTop_toBottomOf="@+id/parameter1_title" />
+
+    <Button
+        android:id="@+id/actionButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:backgroundTint="@android:color/holo_purple"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <ViewSwitcher
+        android:id="@+id/typeNameSwitcher"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="@+id/itemIcon"
+        app:layout_constraintStart_toStartOf="@+id/itemIcon"
+        app:layout_constraintTop_toBottomOf="@+id/itemIcon">
+
+        <TextView
+            android:id="@+id/typeNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="typename"
+            android:textSize="16sp" />
+
+        <Spinner
+            android:id="@+id/typeNameSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:paddingEnd="16dp"
+            android:textSize="16sp" />
+
+    </ViewSwitcher>
+
+    <ViewSwitcher
+        android:id="@+id/idSwitcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        app:layout_constraintBottom_toBottomOf="@+id/id_title"
+        app:layout_constraintStart_toEndOf="@+id/id_title"
+        app:layout_constraintTop_toTopOf="@+id/id_title">
+
+        <TextView
+            android:id="@+id/idTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/idEditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:inputType="number"
+            android:textSize="16sp" />
+    </ViewSwitcher>
+
+
+    <ViewSwitcher
+        android:id="@+id/accessSwitcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        app:layout_constraintBottom_toBottomOf="@+id/access_title"
+        app:layout_constraintStart_toEndOf="@+id/access_title"
+        app:layout_constraintTop_toTopOf="@+id/access_title">
+
+        <TextView
+            android:id="@+id/accessTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="16sp" />
+
+        <Spinner
+            android:id="@+id/accessSpinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:paddingEnd="16dp"
+            android:textSize="16sp" />
+
+    </ViewSwitcher>
+
+
+    <ViewSwitcher
+        android:id="@+id/nameSwitcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        app:layout_constraintBottom_toBottomOf="@+id/name_title"
+        app:layout_constraintStart_toEndOf="@+id/name_title"
+        app:layout_constraintTop_toTopOf="@+id/name_title">
+
+        <TextView
+            android:id="@+id/nameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/nameEditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:inputType="text"
+            android:textSize="16sp" />
+
+    </ViewSwitcher>
+
+    <FrameLayout
+        android:id="@+id/param1Container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        app:layout_constraintBottom_toBottomOf="@+id/parameter1_title"
+        app:layout_constraintStart_toEndOf="@+id/parameter1_title"
+        app:layout_constraintTop_toTopOf="@+id/parameter1_title">
+
+        <TextView
+            android:id="@+id/param1TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/param1EditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:textSize="16sp" />
+
+        <Spinner
+            android:id="@+id/param1Spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:textSize="16sp" />
+    </FrameLayout>
+
+    <ViewSwitcher
+        android:id="@+id/param2Switcher"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        app:layout_constraintBottom_toBottomOf="@+id/parameter2_title"
+        app:layout_constraintStart_toEndOf="@+id/parameter2_title"
+        app:layout_constraintTop_toTopOf="@+id/parameter2_title">
+
+        <TextView
+            android:id="@+id/param2TextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/param2EditText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:inputType="number"
+            android:textSize="16sp" />
+
+    </ViewSwitcher>
+
+    <ImageButton
+        android:id="@+id/backButton"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="4dp"
+        android:background="@null"
+        android:scaleType="centerInside"
+        android:src="@drawable/back"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

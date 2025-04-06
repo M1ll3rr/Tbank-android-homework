@@ -4,5 +4,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="light_purple">#F7CEFF</color>
     <color name="light_blue">#B4C9EB</color>
+<!--    <color name="my_light_primary">#B4C9EB</color>-->
 
 </resources>

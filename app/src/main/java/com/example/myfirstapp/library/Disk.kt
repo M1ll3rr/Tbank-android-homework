@@ -1,26 +1,13 @@
 package com.example.myfirstapp.library
 
-import com.example.myfirstapp.R
+import com.example.myfirstapp.data.DiskTypes
+import com.example.myfirstapp.data.ItemTypes
 
 class Disk(
     id: Int,
     name: String,
-    val diskType: TypesOfDisk,
+    val diskType: DiskTypes,
     access: Boolean = true
-) : LibraryItem(id, name, access), HomeTakeable {
-    override val typeName = "Диск"
-    override val iconId = R.drawable.diskicon
-
-    override fun getInfo() {
-        println("$diskType $name доступен: ${if (access) "Да" else "Нет"}")
-    }
-
-    override fun getHome() {
-        if (access) {
-            access = false
-            println("$typeName $id взяли домой")
-        } else {
-            println("$typeName $id недоступен")
-        }
-    }
+) : LibraryItem(id, name, access){
+    override val itemType: ItemTypes = ItemTypes.DISK
 }

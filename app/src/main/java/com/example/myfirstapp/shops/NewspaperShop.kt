@@ -1,7 +1,6 @@
 package com.example.myfirstapp.shops
 
 import com.example.myfirstapp.data.NewspaperShopData
-import com.example.myfirstapp.library.Months
 import com.example.myfirstapp.library.Newspaper
 
 class NewspaperShop : AbstractShop<Newspaper>() {

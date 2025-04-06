@@ -1,21 +1,11 @@
 package com.example.myfirstapp.library
 
+import android.content.Context
+import com.example.myfirstapp.data.ItemTypes
+
 abstract class LibraryItem(val id: Int, val name: String, var access: Boolean) {
-    abstract val typeName: String
-    abstract val iconId: Int
+    abstract val itemType: ItemTypes
+    val iconId: Int get() = itemType.iconId
 
-    override fun toString(): String {
-        return "$name доступна: ${if (access) "Да" else "Нет"}"
-    }
-
-    abstract fun getInfo()
-
-    fun returnItem() {
-        if (!access) {
-            access = true
-            println("$typeName $id вернули в библиотеку")
-        } else {
-            println("$typeName $id уже в библиотеке")
-        }
-    }
+    fun getTypeName(context: Context) = itemType.getTypeName(context)
 }

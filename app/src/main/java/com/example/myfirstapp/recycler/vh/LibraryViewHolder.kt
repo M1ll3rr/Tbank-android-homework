@@ -1,11 +1,10 @@
 package com.example.myfirstapp.recycler.vh
 
-import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.example.myfirstapp.databinding.LibraryItemBinding
+import com.example.myfirstapp.databinding.ListItemBinding
 import com.example.myfirstapp.library.LibraryItem
 
-class LibraryViewHolder(private val binding: LibraryItemBinding):
+class LibraryViewHolder(private val binding: ListItemBinding):
     RecyclerView.ViewHolder(binding.root) {
     fun bind(libraryItem: LibraryItem) = with(binding) {
         bindId(libraryItem.id)
