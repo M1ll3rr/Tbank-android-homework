@@ -7,15 +7,13 @@ import android.view.MenuItem
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.myfirstapp.viewmodels.MainViewModel
 import com.example.myfirstapp.R
 import com.example.myfirstapp.data.DiskTypes
 import com.example.myfirstapp.data.ItemTypes
-import com.example.myfirstapp.data.LibraryData
 import com.example.myfirstapp.data.Months
 import com.example.myfirstapp.databinding.ActivityMainBinding
 import com.example.myfirstapp.library.Book
@@ -23,6 +21,8 @@ import com.example.myfirstapp.library.Disk
 import com.example.myfirstapp.library.Newspaper
 import com.example.myfirstapp.recycler.adapters.LibraryAdapter
 import com.example.myfirstapp.recycler.itemtouchhelper.RemoveSwipeCallback
+import com.example.myfirstapp.viewmodels.MainViewModel
+import com.example.myfirstapp.viewmodels.ViewModelFactory
 
 class MainActivity : AppCompatActivity() {
     private val binding by lazy {
@@ -30,26 +30,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private lateinit var libraryAdapter: LibraryAdapter
-    private val viewModel: MainViewModel by viewModels()
+    private lateinit var viewModel: MainViewModel
 
     private val startForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         result: ActivityResult ->
         if (result.resultCode == RESULT_OK) {
-            if (result.data?.getStringExtra("mode") == "changeAccess") {
-                val position = result.data?.getIntExtra("position", -1) ?: -1
-                val newAccess = result.data?.getBooleanExtra("access", true) ?: true
-
-                if (position != -1) {
-                    viewModel.updateItemAccess(position, newAccess)
-                    libraryAdapter.notifyItemChanged(position)
-                }
+            if (result.data?.hasExtra(ItemActivity.EXTRA_POSITION) == true) {
+                val position = result.data?.getIntExtra(ItemActivity.EXTRA_POSITION, -1) ?: -1
+                if (position != -1) libraryAdapter.notifyItemChanged(position)
             }
             else {
-                val itemTypeOrdinal = result.data?.getIntExtra("itemTypeOrdinal", 0) ?: 0
+                val itemTypeOrdinal = result.data?.getIntExtra(ItemActivity.EXTRA_ITEM_TYPE, 0) ?: 0
                 val itemType = ItemTypes.entries[itemTypeOrdinal]
-                val id = result.data?.getIntExtra("id", 0)
-                val access = result.data?.getBooleanExtra("access", true)
-                val name = result.data?.getStringExtra("name")
+                val id = result.data?.getIntExtra(ItemActivity.EXTRA_ID, 0)
+                val access = result.data?.getBooleanExtra(ItemActivity.EXTRA_ACCESS, true)
+                val name = result.data?.getStringExtra(ItemActivity.EXTRA_NAME)
                 when (itemType) {
                     ItemTypes.BOOK -> createBook(result, id!!, name!!, access!!)
                     ItemTypes.NEWSPAPER -> createNewspaper(result, id!!, name!!, access!!)
@@ -98,31 +93,32 @@ class MainActivity : AppCompatActivity() {
 
     private fun addItemAction() {
         startForResult.launch(
-            ItemActivity.createIntent(this, "add")
+            ItemActivity.createIntent(this)
         )
     }
 
     private fun initViewModel() {
+        viewModel = ViewModelProvider(this, ViewModelFactory())[MainViewModel::class.java]
         viewModel.items.observe(this) {
             libraryAdapter.setNewData(it)
         }
     }
 
     private fun createBook(result: ActivityResult, id: Int, name: String, access: Boolean) {
-        val author = result.data?.getStringExtra("author")
-        val numOfPage = result.data?.getIntExtra("numOfPage", 0)
+        val author = result.data?.getStringExtra(ItemActivity.EXTRA_AUTHOR)
+        val numOfPage = result.data?.getIntExtra(ItemActivity.EXTRA_NUM_OF_PAGE, 0)
         viewModel.addItem(Book(id, name, author!!, numOfPage!!, access))
     }
 
     private fun createNewspaper(result: ActivityResult, id: Int, name: String, access: Boolean) {
-        val numOfPub = result.data?.getIntExtra("numOfPub", 0)
-        val monthOrdinal = result.data?.getIntExtra("monthOrdinal", 0) ?:0
+        val numOfPub = result.data?.getIntExtra(ItemActivity.EXTRA_NUM_OF_PUB, 0)
+        val monthOrdinal = result.data?.getIntExtra(ItemActivity.EXTRA_MONTH, 0) ?:0
         val month = Months.entries[monthOrdinal]
         viewModel.addItem(Newspaper(id, name, numOfPub!!, month, access))
     }
 
     private fun createDisk(result: ActivityResult, id: Int, name: String, access: Boolean) {
-        val diskType = result.data?.getStringExtra("diskType")
+        val diskType = result.data?.getStringExtra(ItemActivity.EXTRA_DISK_TYPE)
         viewModel.addItem(Disk(id, name, DiskTypes.valueOf(diskType!!), access))
     }
 

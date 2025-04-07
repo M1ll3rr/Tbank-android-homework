@@ -38,8 +38,8 @@ class LibraryAdapter(private val launcher: ActivityResultLauncher<Intent>): Recy
     private fun handleLibraryClick(context: Context, position: Int) {
         if (position != RecyclerView.NO_POSITION) {
             val item = data[position]
-            val intent = ItemActivity.createIntent(context, "view", item)
-            intent.putExtra("position", position)
+            val intent = ItemActivity.createIntent(context, item)
+            intent.putExtra(ItemActivity.EXTRA_POSITION, position)
             launcher.launch(intent)
         }
     }

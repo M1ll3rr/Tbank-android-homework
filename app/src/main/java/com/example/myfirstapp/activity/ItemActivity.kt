@@ -1,6 +1,5 @@
 package com.example.myfirstapp.activity
 
-import android.R as AR
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -9,25 +8,28 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import com.example.myfirstapp.viewmodels.MainViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.myfirstapp.R
+import com.example.myfirstapp.data.DiskTypes
 import com.example.myfirstapp.data.ItemTypes
+import com.example.myfirstapp.data.Months
 import com.example.myfirstapp.databinding.ActivityItemBinding
 import com.example.myfirstapp.library.Book
 import com.example.myfirstapp.library.Disk
-import com.example.myfirstapp.data.DiskTypes
 import com.example.myfirstapp.library.LibraryItem
-import com.example.myfirstapp.data.Months
 import com.example.myfirstapp.library.Newspaper
+import com.example.myfirstapp.viewmodels.ItemActivityViewModel
+import com.example.myfirstapp.viewmodels.ViewModelFactory
+import android.R as AR
 
 class ItemActivity : AppCompatActivity() {
     private val binding by lazy {
         ActivityItemBinding.inflate(layoutInflater)
     }
-    private val viewModel: MainViewModel by viewModels()
-
+    private val viewModel by lazy {
+        ViewModelProvider(this, ViewModelFactory())[ItemActivityViewModel::class.java]
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,29 +39,28 @@ class ItemActivity : AppCompatActivity() {
         setupViewSwitchers()
     }
 
+
     private fun initButtons() {
         val backButton = binding.backButton
         val actionButton = binding.actionButton
-        val addMode = intent.getStringExtra("mode") == "add"
-        val access = intent.getBooleanExtra("access", true)
+        val access = intent.getBooleanExtra(EXTRA_ACCESS, true)
 
         backButton.setOnClickListener { finish() }
 
-        if (addMode) actionButton.setText(R.string.add)
+        if (intent.action == ACTION_ADD) actionButton.setText(R.string.add)
         else {
             if (access) actionButton.setText(R.string.take)
             else actionButton.setText(R.string.returns)
         }
 
         actionButton.setOnClickListener {
-            if (addMode) addNewItem()
+            if (intent.action == ACTION_ADD) addNewItem()
             else itemAction(access)
         }
     }
 
     private fun setupViewSwitchers() {
-        val addMode = intent.getStringExtra("mode") == "add"
-        if (addMode) {
+        if (intent.action == ACTION_ADD) {
             binding.typeNameSwitcher.displayedChild = 1
             binding.idSwitcher.displayedChild = 1
             binding.accessSwitcher.displayedChild = 1
@@ -180,7 +181,7 @@ class ItemActivity : AppCompatActivity() {
     }
 
     private fun fillViews() {
-        val itemTypeOrdinal = intent.getIntExtra("itemTypeOrdinal", 0)
+        val itemTypeOrdinal = intent.getIntExtra(EXTRA_ITEM_TYPE, 0)
         val itemType = ItemTypes.entries[itemTypeOrdinal]
         fillUniversalData(itemType)
         when (itemType) {
@@ -194,10 +195,10 @@ class ItemActivity : AppCompatActivity() {
         with(binding) {
             itemIcon.setImageResource(itemType.iconId)
             typeNameTextView.text = itemType.getTypeName(this@ItemActivity)
-            idTextView.text = intent.getIntExtra("id", 0).toString()
-            accessTextView.text = if (intent.getBooleanExtra("access", true))
+            idTextView.text = intent.getIntExtra(EXTRA_ID, 0).toString()
+            accessTextView.text = if (intent.getBooleanExtra(EXTRA_ACCESS, true))
                 getString(R.string.access_true) else getString(R.string.access_false)
-            nameTextView.text = intent.getStringExtra("name")
+            nameTextView.text = intent.getStringExtra(EXTRA_NAME)
         }
     }
 
@@ -205,18 +206,18 @@ class ItemActivity : AppCompatActivity() {
     private fun fillBookData() {
         with(binding) {
             parameter1Title.setText(R.string.author)
-            param1TextView.text = intent.getStringExtra("author")
+            param1TextView.text = intent.getStringExtra(EXTRA_AUTHOR)
             parameter2Title.setText(R.string.numOfPage)
-            param2TextView.text = intent.getIntExtra("numOfPage", 0).toString()
+            param2TextView.text = intent.getIntExtra(EXTRA_NUM_OF_PAGE, 0).toString()
         }
     }
 
     private fun fillNewspaperData() {
         with(binding) {
             parameter1Title.setText(R.string.numOfPub)
-            param1TextView.text = intent.getIntExtra("numOfPub", 0).toString()
+            param1TextView.text = intent.getIntExtra(EXTRA_NUM_OF_PUB, 0).toString()
             parameter2Title.setText(R.string.monthOfPub)
-            val monthOrdinal = intent.getIntExtra("monthOrdinal", 0)
+            val monthOrdinal = intent.getIntExtra(EXTRA_MONTH, 0)
             val month = Months.entries[monthOrdinal]
             param2TextView.text = month.getLocalName(this@ItemActivity)
         }
@@ -225,7 +226,7 @@ class ItemActivity : AppCompatActivity() {
     private fun fillDiscData() {
         with(binding) {
             parameter1Title.setText(R.string.diskType)
-            param1TextView.text = intent.getStringExtra("diskType")
+            param1TextView.text = intent.getStringExtra(EXTRA_DISK_TYPE)
             parameter2Title.visibility = View.INVISIBLE
             param2TextView.visibility = View.INVISIBLE
         }
@@ -272,22 +273,23 @@ class ItemActivity : AppCompatActivity() {
         }
 
         val resultIntent = Intent().apply {
-            putExtra("itemTypeOrdinal", itemType.ordinal)
-            putExtra("id", id)
-            putExtra("access", access)
-            putExtra("name", name)
+            action = ACTION_ADD
+            putExtra(EXTRA_ITEM_TYPE, itemType.ordinal)
+            putExtra(EXTRA_ID, id)
+            putExtra(EXTRA_ACCESS, access)
+            putExtra(EXTRA_NAME, name)
 
             when (itemType) {
                 ItemTypes.BOOK -> {
-                    putExtra("author", binding.param1EditText.text.toString())
-                    putExtra("numOfPage", binding.param2EditText.text.toString().toInt())
+                    putExtra(EXTRA_AUTHOR, binding.param1EditText.text.toString())
+                    putExtra(EXTRA_NUM_OF_PAGE, binding.param2EditText.text.toString().toInt())
                 }
                 ItemTypes.NEWSPAPER -> {
-                    putExtra("numOfPub", binding.param2EditText.text.toString().toInt())
-                    putExtra("monthOrdinal", binding.param1Spinner.selectedItemPosition)
+                    putExtra(EXTRA_NUM_OF_PUB, binding.param2EditText.text.toString().toInt())
+                    putExtra(EXTRA_MONTH, binding.param1Spinner.selectedItemPosition)
                 }
                 ItemTypes.DISK -> {
-                    putExtra("diskType", DiskTypes.entries[binding.param1Spinner.selectedItemPosition].name)
+                    putExtra(EXTRA_DISK_TYPE, DiskTypes.entries[binding.param1Spinner.selectedItemPosition].name)
                 }
             }
         }
@@ -298,35 +300,49 @@ class ItemActivity : AppCompatActivity() {
 
     private fun itemAction(access: Boolean) {
         val newAccess = !access
-        val resultIntent = Intent().apply {
-            putExtra("mode", "changeAccess")
-            putExtra("access", newAccess)
-            putExtra("position", intent.getIntExtra("position", -1))
-        }
-        setResult(RESULT_OK, resultIntent)
+        val position = intent.getIntExtra(EXTRA_POSITION, -1)
+        viewModel.updateItemAccess(position, newAccess)
+        setResult(RESULT_OK, Intent().putExtra(EXTRA_POSITION, position))
         finish()
     }
 
     companion object {
-        fun createIntent(context: Context, mode: String, item: LibraryItem? = null): Intent {
+        const val ACTION_VIEW = "com.example.myfirstapp.ACTION_VIEW"
+        const val ACTION_ADD = "com.example.myfirstapp.ACTION_ADD"
+
+        const val EXTRA_ITEM_TYPE = "itemTypeOrdinal"
+        const val EXTRA_POSITION = "position"
+        const val EXTRA_ID = "id"
+        const val EXTRA_ACCESS = "access"
+        const val EXTRA_NAME = "name"
+        const val EXTRA_AUTHOR = "author"
+        const val EXTRA_NUM_OF_PAGE = "numOfPage"
+        const val EXTRA_NUM_OF_PUB = "numOfPub"
+        const val EXTRA_MONTH = "monthOrdinal"
+        const val EXTRA_DISK_TYPE = "diskType"
+
+        fun createIntent(context: Context, item: LibraryItem? = null): Intent {
             return Intent(context, ItemActivity::class.java).apply {
-                putExtra("mode", mode)
+                if (item == null)
+                    action = ACTION_ADD
+                else
+                    action = ACTION_VIEW
 
                 if (item != null) {
-                    putExtra("itemTypeOrdinal", item.itemType.ordinal)
-                    putExtra("id", item.id)
-                    putExtra("access", item.access)
-                    putExtra("name", item.name)
+                    putExtra(EXTRA_ITEM_TYPE, item.itemType.ordinal)
+                    putExtra(EXTRA_ID, item.id)
+                    putExtra(EXTRA_ACCESS, item.access)
+                    putExtra(EXTRA_NAME, item.name)
                     when (item) {
                         is Book -> {
-                            putExtra("author", item.author)
-                            putExtra("numOfPage", item.numOfPage)
+                            putExtra(EXTRA_AUTHOR, item.author)
+                            putExtra(EXTRA_NUM_OF_PAGE, item.numOfPage)
                         }
                         is Newspaper -> {
-                            putExtra("numOfPub", item.numOfPub)
-                            putExtra("monthOrdinal", item.monthOfPub.ordinal)
+                            putExtra(EXTRA_NUM_OF_PUB, item.numOfPub)
+                            putExtra(EXTRA_MONTH, item.monthOfPub.ordinal)
                         }
-                        is Disk -> putExtra("diskType", item.diskType.name)
+                        is Disk -> putExtra(EXTRA_DISK_TYPE, item.diskType.name)
                     }
                 }
             }
