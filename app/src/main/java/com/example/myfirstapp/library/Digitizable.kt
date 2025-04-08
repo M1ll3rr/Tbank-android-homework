@@ -1,7 +1,9 @@
 package com.example.myfirstapp.library
 
+import com.example.myfirstapp.data.ItemTypes
+
 interface Digitizable {
     val id: Int
     val name: String
-    val typeName: String
+    val itemType: ItemTypes
 }

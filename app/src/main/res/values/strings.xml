@@ -1,3 +1,34 @@
 <resources>
-    <string name="app_name">MyFirstApp</string>
+    <string name="january">January</string>
+    <string name="february">February</string>
+    <string name="march">March</string>
+    <string name="april">April</string>
+    <string name="may">May</string>
+    <string name="june">June</string>
+    <string name="july">July</string>
+    <string name="august">August</string>
+    <string name="september">September</string>
+    <string name="october">October</string>
+    <string name="november">November</string>
+    <string name="december">December</string>
+
+    <string name="app_name">Library</string>
+    <string name="access">Availability</string>
+    <string name="access_true">Available</string>
+    <string name="access_false">Unavailable</string>
+    <string name="id" translatable="false">ID</string>
+    <string name="name">Name</string>
+    <string name="author">Author</string>
+    <string name="numOfPage">Pages</string>
+    <string name="numOfPub">Publication №</string>
+    <string name="monthOfPub">Month</string>
+    <string name="diskType">Type</string>
+    <string name="book">Book</string>
+    <string name="newspaper">Newspaper</string>
+    <string name="disk">Disk</string>
+    <string name="take">Take</string>
+    <string name="add">Add to library</string>
+    <string name="returns">Return to library</string>
+    <string name="fill_error">Fill in all fields</string>
+    <string name="id_error">Element with this id already exists</string>
 </resources>

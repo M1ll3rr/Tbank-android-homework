@@ -1,6 +1,7 @@
 package com.example.myfirstapp.library
 
-import com.example.myfirstapp.R
+import com.example.myfirstapp.data.ItemTypes
+import com.example.myfirstapp.data.Months
 
 class Newspaper(
     id: Int,
@@ -8,20 +9,6 @@ class Newspaper(
     val numOfPub: Int,
     val monthOfPub: Months,
     access: Boolean = true
-) : LibraryItem(id, name, access), InsideReadable, Digitizable {
-    override val typeName = "Газета"
-    override val iconId = R.drawable.newspapericon
-
-    override fun getInfo() {
-        println("Выпуск №$numOfPub $monthOfPub газеты $name с id: $id доступен: ${if (access) "Да" else "Нет"}")
-    }
-
-    override fun readInside() {
-        if (access) {
-            access = false
-            println("$typeName $id взята в читальный зал")
-        } else {
-            println("$typeName $id недоступна")
-        }
-    }
+) : LibraryItem(id, name, access) {
+    override val itemType: ItemTypes = ItemTypes.NEWSPAPER
 }

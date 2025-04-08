@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="january">Январь</string>
+    <string name="february">Февраль</string>
+    <string name="march">Март</string>
+    <string name="april">Апрель</string>
+    <string name="may">Май</string>
+    <string name="june">Июнь</string>
+    <string name="july">Июль</string>
+    <string name="august">Август</string>
+    <string name="september">Сентябрь</string>
+    <string name="october">Октябрь</string>
+    <string name="november">Ноябрь</string>
+    <string name="december">Декабрь</string>
+
+    <string name="app_name">Библиотека</string>
+    <string name="access">Доступность</string>
+    <string name="access_true">Доступен</string>
+    <string name="access_false">Недоступен</string>
+    <string name="name">Название</string>
+    <string name="author">Автор</string>
+    <string name="numOfPage">Страниц</string>
+    <string name="numOfPub">Выпуск №</string>
+    <string name="monthOfPub">Месяц</string>
+    <string name="diskType">Тип</string>
+    <string name="book">Книга</string>
+    <string name="newspaper">Газета</string>
+    <string name="disk">Диск</string>
+    <string name="take">Взять</string>
+    <string name="add">Добавить в библиотеку</string>
+    <string name="returns">Вернуть в библиотеку</string>
+    <string name="fill_error">Заполните все поля</string>
+    <string name="id_error">Элемент с таким id уже существует</string>
+</resources>

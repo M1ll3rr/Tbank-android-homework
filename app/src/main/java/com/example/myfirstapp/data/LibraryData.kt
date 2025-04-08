@@ -2,9 +2,7 @@ package com.example.myfirstapp.data
 
 import com.example.myfirstapp.library.Book
 import com.example.myfirstapp.library.Disk
-import com.example.myfirstapp.library.Months
 import com.example.myfirstapp.library.Newspaper
-import com.example.myfirstapp.library.TypesOfDisk
 
 object LibraryData {
     val items =  mutableListOf(
@@ -22,14 +20,14 @@ object LibraryData {
         Newspaper(204, "Комсомольская прада", 98765, Months.APRIL),
         Newspaper(205, "Телесемь", 11223, Months.MAY),
         Newspaper(206, "The Economist", 44556, Months.JUNE),
-        Disk(301, "Вестник", TypesOfDisk.CD),
-        Disk(302, "Лесник", TypesOfDisk.CD),
-        Disk(303, "Back in Black", TypesOfDisk.CD, false),
-        Disk(304, "Abbey Road", TypesOfDisk.CD),
-        Disk(305, "Rumours", TypesOfDisk.CD),
-        Disk(306, "Nevermind", TypesOfDisk.CD),
-        Disk(307, "Матрица", TypesOfDisk.DVD, false),
-        Disk(308, "Начало", TypesOfDisk.DVD),
-        Disk(309, "Интерстеллар", TypesOfDisk.DVD)
+        Disk(301, "Вестник", DiskTypes.CD),
+        Disk(302, "Лесник", DiskTypes.CD),
+        Disk(303, "Back in Black", DiskTypes.CD, false),
+        Disk(304, "Abbey Road", DiskTypes.CD),
+        Disk(305, "Rumours", DiskTypes.CD),
+        Disk(306, "Nevermind", DiskTypes.CD),
+        Disk(307, "Матрица", DiskTypes.DVD, false),
+        Disk(308, "Начало", DiskTypes.DVD),
+        Disk(309, "Интерстеллар", DiskTypes.DVD)
     )
 }
