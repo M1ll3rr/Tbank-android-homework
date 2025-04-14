@@ -1,4 +1,4 @@
-package com.example.myfirstapp.activity
+package com.example.myfirstapp.ui
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
@@ -19,12 +19,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(binding.root)
-//        val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
     }
 
     override fun onSupportNavigateUp(): Boolean {
         return navController.navigateUp()
     }
-
 
 }

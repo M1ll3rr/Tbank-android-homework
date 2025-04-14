@@ -1,4 +1,4 @@
-package com.example.myfirstapp.fragment
+package com.example.myfirstapp.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -18,11 +18,10 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myfirstapp.R
 import com.example.myfirstapp.databinding.FragmentMainBinding
-import com.example.myfirstapp.fragment.ItemFragment.Companion.EXTRA_NEW_ITEM_POS
-import com.example.myfirstapp.fragment.ItemFragment.Companion.NEW_ITEM_REQUEST
+import com.example.myfirstapp.ui.ItemFragment.Companion.EXTRA_NEW_ITEM_POS
+import com.example.myfirstapp.ui.ItemFragment.Companion.NEW_ITEM_REQUEST
 import com.example.myfirstapp.recycler.adapters.LibraryAdapter
 import com.example.myfirstapp.recycler.itemtouchhelper.RemoveSwipeCallback
-import com.example.myfirstapp.viewmodels.MainViewModel
 import com.example.myfirstapp.viewmodels.ViewModelFactory
 import dev.androidbroadcast.vbpd.viewBinding
 
@@ -49,7 +48,9 @@ class MainFragment : Fragment(), MenuProvider {
         super.onViewCreated(view, savedInstanceState)
         setFragmentResultListener(NEW_ITEM_REQUEST) { _, bundle ->
             scrollPosition = bundle.getInt(EXTRA_NEW_ITEM_POS)
-            binding.rcView.smoothScrollToPosition(scrollPosition)
+            with(binding.rcView) {
+                post { smoothScrollToPosition(scrollPosition) }
+            }
         }
         initToolbar()
         initViewModel()

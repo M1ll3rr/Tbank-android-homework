@@ -6,7 +6,7 @@ import androidx.navigation.NavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.myfirstapp.databinding.ListItemBinding
-import com.example.myfirstapp.fragment.ItemFragment
+import com.example.myfirstapp.ui.ItemFragment
 import com.example.myfirstapp.library.LibraryItem
 import com.example.myfirstapp.recycler.utils.LibraryDiffUtil
 import com.example.myfirstapp.recycler.vh.LibraryViewHolder

@@ -1,4 +1,4 @@
-package com.example.myfirstapp.fragment
+package com.example.myfirstapp.ui
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -22,7 +22,6 @@ import com.example.myfirstapp.library.Book
 import com.example.myfirstapp.library.Disk
 import com.example.myfirstapp.library.LibraryItem
 import com.example.myfirstapp.library.Newspaper
-import com.example.myfirstapp.viewmodels.ItemViewModel
 import com.example.myfirstapp.viewmodels.ViewModelFactory
 import dev.androidbroadcast.vbpd.viewBinding
 
