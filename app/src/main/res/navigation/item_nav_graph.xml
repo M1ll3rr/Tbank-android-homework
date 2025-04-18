@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/item_nav_graph"
+    app:startDestination="@id/placeholder">
+
+    <fragment
+        android:id="@+id/itemFragment2"
+        android:name="com.example.myfirstapp.ui.ItemFragment"
+        android:label="fragment_item"
+        tools:layout="@layout/fragment_item" >
+    <argument
+        android:name="itemTypeOrdinal"
+        app:argType="integer"
+        android:defaultValue="-1" />
+    <argument
+        android:name="itemId"
+        app:argType="integer"
+        android:defaultValue="-1" />
+    <argument
+        android:name="itemName"
+        app:argType="string"
+        app:nullable="true" />
+    <argument
+        android:name="itemAccess"
+        app:argType="boolean"
+        android:defaultValue="true" />
+    <argument
+        android:name="parameter1"
+        app:argType="string"
+        app:nullable="true" />
+    <argument
+        android:name="parameter2"
+        app:argType="string"
+        app:nullable="true" />
+    <argument
+        android:name="position"
+        app:argType="integer"
+        android:defaultValue="-1" />
+        <action
+            android:id="@+id/action_itemFragment2_to_placeholder"
+            app:destination="@id/placeholder" />
+    </fragment>
+    <fragment android:id="@+id/placeholder" >
+        <action
+            android:id="@+id/action_placeholder_to_itemFragment2"
+            app:destination="@id/itemFragment2" />
+    </fragment>
+</navigation>

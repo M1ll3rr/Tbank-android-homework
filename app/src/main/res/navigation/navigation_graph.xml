@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_graph"
+    app:startDestination="@id/mainFragment">
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.example.myfirstapp.ui.MainFragment"
+        android:label="fragment_main"
+        tools:layout="@layout/fragment_main" >
+        <action
+            android:id="@+id/action_mainFragment_to_itemFragment"
+            app:enterAnim="@android:anim/slide_in_left"
+            app:popExitAnim="@android:anim/slide_out_right"
+            app:destination="@id/itemFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/itemFragment"
+        android:name="com.example.myfirstapp.ui.ItemFragment"
+        android:label="fragment_item"
+        tools:layout="@layout/fragment_item" >
+        <argument
+            android:name="itemTypeOrdinal"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <argument
+            android:name="itemId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <argument
+            android:name="itemName"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="itemAccess"
+            app:argType="boolean"
+            android:defaultValue="true" />
+        <argument
+            android:name="parameter1"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="parameter2"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="position"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <action
+            android:id="@+id/action_itemFragment_to_mainFragment"
+            app:destination="@id/mainFragment" />
+    </fragment>
+</navigation>

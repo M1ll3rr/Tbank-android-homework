@@ -1,66 +1,76 @@
-package com.example.myfirstapp.activity
+package com.example.myfirstapp.ui
 
-import android.content.Context
-import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.setFragmentResult
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.NavDirections
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.example.myfirstapp.R
 import com.example.myfirstapp.data.DiskTypes
 import com.example.myfirstapp.data.ItemTypes
 import com.example.myfirstapp.data.Months
-import com.example.myfirstapp.databinding.ActivityItemBinding
+import com.example.myfirstapp.databinding.FragmentItemBinding
 import com.example.myfirstapp.library.Book
 import com.example.myfirstapp.library.Disk
 import com.example.myfirstapp.library.LibraryItem
 import com.example.myfirstapp.library.Newspaper
-import com.example.myfirstapp.viewmodels.ItemActivityViewModel
 import com.example.myfirstapp.viewmodels.ViewModelFactory
-import android.R as AR
+import dev.androidbroadcast.vbpd.viewBinding
 
-class ItemActivity : AppCompatActivity() {
-    private val binding by lazy {
-        ActivityItemBinding.inflate(layoutInflater)
-    }
+
+class ItemFragment : Fragment() {
+    private val binding: FragmentItemBinding by viewBinding(FragmentItemBinding::bind)
+    private val args: ItemFragmentArgs by navArgs()
     private val viewModel by lazy {
-        ViewModelProvider(this, ViewModelFactory())[ItemActivityViewModel::class.java]
+        ViewModelProvider(this, ViewModelFactory())[ItemViewModel::class.java]
+    }
+    private val addMode by lazy {
+        args.itemId == -1
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        return inflater.inflate(R.layout.fragment_item, container, false)
+    }
+
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         initButtons()
         setupViewSwitchers()
     }
 
-
     private fun initButtons() {
-        val backButton = binding.backButton
+        binding.backButton.setOnClickListener {
+            findNavController().navigateUp()
+        }
         val actionButton = binding.actionButton
-        val access = intent.getBooleanExtra(EXTRA_ACCESS, true)
+        val access = args.itemAccess
 
-        backButton.setOnClickListener { finish() }
-
-        if (intent.action == ACTION_ADD) actionButton.setText(R.string.add)
+        if (addMode) actionButton.setText(R.string.add)
         else {
             if (access) actionButton.setText(R.string.take)
             else actionButton.setText(R.string.returns)
         }
 
         actionButton.setOnClickListener {
-            if (intent.action == ACTION_ADD) addNewItem()
+            if (addMode) addNewItem()
             else itemAction(access)
         }
     }
 
     private fun setupViewSwitchers() {
-        if (intent.action == ACTION_ADD) {
+        if (addMode) {
             binding.typeNameSwitcher.displayedChild = 1
             binding.idSwitcher.displayedChild = 1
             binding.accessSwitcher.displayedChild = 1
@@ -79,24 +89,24 @@ class ItemActivity : AppCompatActivity() {
     }
 
     private fun setupSpinners() {
-        val typeNames = ItemTypes.getAllTypeNames(this)
-        val typeNameAdapter = ArrayAdapter(this, AR.layout.simple_spinner_item, typeNames)
-        typeNameAdapter.setDropDownViewResource(AR.layout.simple_spinner_dropdown_item)
+        val typeNames = ItemTypes.getAllTypeNames(requireContext())
+        val typeNameAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, typeNames)
+        typeNameAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.typeNameSpinner.adapter = typeNameAdapter
 
-        val accessAdapter = ArrayAdapter(this, AR.layout.simple_spinner_item, listOf(getString(R.string.access_true), getString(
+        val accessAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, listOf(getString(R.string.access_true), getString(
             R.string.access_false
         )))
-        accessAdapter.setDropDownViewResource(AR.layout.simple_spinner_dropdown_item)
+        accessAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.accessSpinner.adapter = accessAdapter
 
         val diskTypes = DiskTypes.getAllDiskTypes()
-        val diskTypeAdapter = ArrayAdapter(this, AR.layout.simple_spinner_item, diskTypes)
-        diskTypeAdapter.setDropDownViewResource(AR.layout.simple_spinner_dropdown_item)
+        val diskTypeAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, diskTypes)
+        diskTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        val months = Months.getAllMonths(this)
-        val monthsAdapter = ArrayAdapter(this, AR.layout.simple_spinner_item, months)
-        monthsAdapter.setDropDownViewResource(AR.layout.simple_spinner_dropdown_item)
+        val months = Months.getAllMonths(requireContext())
+        val monthsAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, months)
+        monthsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
         binding.typeNameSpinner.onItemSelectedListener =
             object : AdapterView.OnItemSelectedListener {
@@ -181,7 +191,7 @@ class ItemActivity : AppCompatActivity() {
     }
 
     private fun fillViews() {
-        val itemTypeOrdinal = intent.getIntExtra(EXTRA_ITEM_TYPE, 0)
+        val itemTypeOrdinal = args.itemTypeOrdinal
         val itemType = ItemTypes.entries[itemTypeOrdinal]
         fillUniversalData(itemType)
         when (itemType) {
@@ -194,39 +204,37 @@ class ItemActivity : AppCompatActivity() {
     private fun fillUniversalData(itemType: ItemTypes) {
         with(binding) {
             itemIcon.setImageResource(itemType.iconId)
-            typeNameTextView.text = itemType.getTypeName(this@ItemActivity)
-            idTextView.text = intent.getIntExtra(EXTRA_ID, 0).toString()
-            accessTextView.text = if (intent.getBooleanExtra(EXTRA_ACCESS, true))
-                getString(R.string.access_true) else getString(R.string.access_false)
-            nameTextView.text = intent.getStringExtra(EXTRA_NAME)
+            typeNameTextView.text = itemType.getTypeName(requireContext())
+            idTextView.text = args.itemId.toString()
+            accessTextView.text = if (args.itemAccess) getString(R.string.access_true) else getString(R.string.access_false)
+            nameTextView.text = args.itemName
         }
     }
-
 
     private fun fillBookData() {
         with(binding) {
             parameter1Title.setText(R.string.author)
-            param1TextView.text = intent.getStringExtra(EXTRA_AUTHOR)
+            param1TextView.text = args.parameter1
             parameter2Title.setText(R.string.numOfPage)
-            param2TextView.text = intent.getIntExtra(EXTRA_NUM_OF_PAGE, 0).toString()
+            param2TextView.text = args.parameter2
         }
     }
 
     private fun fillNewspaperData() {
         with(binding) {
             parameter1Title.setText(R.string.numOfPub)
-            param1TextView.text = intent.getIntExtra(EXTRA_NUM_OF_PUB, 0).toString()
+            param1TextView.text = args.parameter1
             parameter2Title.setText(R.string.monthOfPub)
-            val monthOrdinal = intent.getIntExtra(EXTRA_MONTH, 0)
-            val month = Months.entries[monthOrdinal]
-            param2TextView.text = month.getLocalName(this@ItemActivity)
+            val monthOrdinal = args.parameter2?.toInt()
+            val month = Months.entries[monthOrdinal!!]
+            param2TextView.text = month.getLocalName(requireContext())
         }
     }
 
     private fun fillDiscData() {
         with(binding) {
             parameter1Title.setText(R.string.diskType)
-            param1TextView.text = intent.getStringExtra(EXTRA_DISK_TYPE)
+            param1TextView.text = args.parameter1
             parameter2Title.visibility = View.INVISIBLE
             param2TextView.visibility = View.INVISIBLE
         }
@@ -238,7 +246,7 @@ class ItemActivity : AppCompatActivity() {
                 val author = binding.param1EditText.text.toString()
                 val numOfPage = binding.param2EditText.text.toString().toIntOrNull()
                 if (author.isEmpty() || numOfPage == null) {
-                    Toast.makeText(this, R.string.fill_error, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), R.string.fill_error, Toast.LENGTH_SHORT).show()
                     return true
                 }
             }
@@ -246,7 +254,7 @@ class ItemActivity : AppCompatActivity() {
                 val month = Months.entries[binding.param1Spinner.selectedItemPosition]
                 val numOfPub = binding.param2EditText.text.toString().toIntOrNull()
                 if (numOfPub == null) {
-                    Toast.makeText(this, R.string.fill_error, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), R.string.fill_error, Toast.LENGTH_SHORT).show()
                     return true
                 }
             }
@@ -262,90 +270,99 @@ class ItemActivity : AppCompatActivity() {
         val access = binding.accessSpinner.selectedItemPosition == 0
 
         if (id == null || name.isEmpty()) {
-            Toast.makeText(this, R.string.fill_error, Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.fill_error, Toast.LENGTH_SHORT).show()
             return
         }
         if (checkTypeFill(itemType)) return
 
         if (viewModel.isIdExists(id)) {
-            Toast.makeText(this, R.string.id_error, Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.id_error, Toast.LENGTH_SHORT).show()
             return
         }
 
-        val resultIntent = Intent().apply {
-            action = ACTION_ADD
-            putExtra(EXTRA_ITEM_TYPE, itemType.ordinal)
-            putExtra(EXTRA_ID, id)
-            putExtra(EXTRA_ACCESS, access)
-            putExtra(EXTRA_NAME, name)
-
-            when (itemType) {
-                ItemTypes.BOOK -> {
-                    putExtra(EXTRA_AUTHOR, binding.param1EditText.text.toString())
-                    putExtra(EXTRA_NUM_OF_PAGE, binding.param2EditText.text.toString().toInt())
-                }
-                ItemTypes.NEWSPAPER -> {
-                    putExtra(EXTRA_NUM_OF_PUB, binding.param2EditText.text.toString().toInt())
-                    putExtra(EXTRA_MONTH, binding.param1Spinner.selectedItemPosition)
-                }
-                ItemTypes.DISK -> {
-                    putExtra(EXTRA_DISK_TYPE, DiskTypes.entries[binding.param1Spinner.selectedItemPosition].name)
-                }
-            }
+        val newItem = when (itemType) {
+            ItemTypes.BOOK -> createBook(id, name, access)
+            ItemTypes.NEWSPAPER -> createNewspaper(id, name, access)
+            ItemTypes.DISK -> createDisk(id, name, access)
         }
+        viewModel.addItem(newItem)
+        val newPosition = viewModel.getNewItemPosition(newItem)
+        val bundle = Bundle()
+        bundle.putInt(EXTRA_NEW_ITEM_POS, newPosition)
+        setFragmentResult(NEW_ITEM_REQUEST, bundle)
+        findNavController().navigateUp()
+    }
 
-        setResult(RESULT_OK, resultIntent)
-        finish()
+    private fun createBook(id: Int, name: String, access: Boolean) : Book {
+        val author = binding.param1EditText.text.toString()
+        val numOfPage = binding.param2EditText.text.toString().toInt()
+        return Book(id, name, author, numOfPage, access)
+    }
+
+    private fun createNewspaper(id: Int, name: String, access: Boolean) : Newspaper {
+        val numOfPub = binding.param2EditText.text.toString().toInt()
+        val monthOrdinal = binding.param1Spinner.selectedItemPosition
+        val month = Months.entries[monthOrdinal]
+        return Newspaper(id, name, numOfPub, month, access)
+    }
+
+    private fun createDisk(id: Int, name: String, access: Boolean) : Disk {
+        val diskTypeName = DiskTypes.entries[binding.param1Spinner.selectedItemPosition].name
+        val diskType = DiskTypes.valueOf(diskTypeName)
+        return Disk(id, name, diskType, access)
     }
 
     private fun itemAction(access: Boolean) {
         val newAccess = !access
-        val position = intent.getIntExtra(EXTRA_POSITION, -1)
+        val position = args.position
         viewModel.updateItemAccess(position, newAccess)
-        setResult(RESULT_OK, Intent().putExtra(EXTRA_POSITION, position))
-        finish()
+        findNavController().navigateUp()
     }
 
     companion object {
-        const val ACTION_VIEW = "com.example.myfirstapp.ACTION_VIEW"
-        const val ACTION_ADD = "com.example.myfirstapp.ACTION_ADD"
-
         const val EXTRA_ITEM_TYPE = "itemTypeOrdinal"
         const val EXTRA_POSITION = "position"
         const val EXTRA_ID = "id"
         const val EXTRA_ACCESS = "access"
         const val EXTRA_NAME = "name"
-        const val EXTRA_AUTHOR = "author"
-        const val EXTRA_NUM_OF_PAGE = "numOfPage"
-        const val EXTRA_NUM_OF_PUB = "numOfPub"
-        const val EXTRA_MONTH = "monthOrdinal"
-        const val EXTRA_DISK_TYPE = "diskType"
+        const val EXTRA_PARAM1 = "parameter1"
+        const val EXTRA_PARAM2 = "parameter2"
+        const val EXTRA_NEW_ITEM_POS = "newItemPos"
+        const val NEW_ITEM_REQUEST = "newItemReq"
 
-        fun createIntent(context: Context, item: LibraryItem? = null): Intent {
-            return Intent(context, ItemActivity::class.java).apply {
-                if (item == null)
-                    action = ACTION_ADD
-                else
-                    action = ACTION_VIEW
+        fun createAction(item: LibraryItem, position: Int): NavDirections {
+            val params = mutableMapOf<String, Any?>(
+                EXTRA_POSITION to position,
+                EXTRA_ITEM_TYPE to item.itemType.ordinal,
+                EXTRA_ID to item.id,
+                EXTRA_NAME to item.name,
+                EXTRA_ACCESS to item.access
+            )
+            when (item) {
+                is Book -> {
+                    params[EXTRA_PARAM1] = item.author
+                    params[EXTRA_PARAM2] = item.numOfPage.toString()
+                }
 
-                if (item != null) {
-                    putExtra(EXTRA_ITEM_TYPE, item.itemType.ordinal)
-                    putExtra(EXTRA_ID, item.id)
-                    putExtra(EXTRA_ACCESS, item.access)
-                    putExtra(EXTRA_NAME, item.name)
-                    when (item) {
-                        is Book -> {
-                            putExtra(EXTRA_AUTHOR, item.author)
-                            putExtra(EXTRA_NUM_OF_PAGE, item.numOfPage)
-                        }
-                        is Newspaper -> {
-                            putExtra(EXTRA_NUM_OF_PUB, item.numOfPub)
-                            putExtra(EXTRA_MONTH, item.monthOfPub.ordinal)
-                        }
-                        is Disk -> putExtra(EXTRA_DISK_TYPE, item.diskType.name)
-                    }
+                is Disk -> {
+                    params[EXTRA_PARAM1] = item.diskType.name
+                    params[EXTRA_PARAM2] = null
+                }
+
+                is Newspaper -> {
+                    params[EXTRA_PARAM1] = item.numOfPub.toString()
+                    params[EXTRA_PARAM2] = item.monthOfPub.ordinal.toString()
                 }
             }
+            return MainFragmentDirections.actionMainFragmentToItemFragment(
+                position = params[EXTRA_POSITION] as Int,
+                itemTypeOrdinal = params[EXTRA_ITEM_TYPE] as Int,
+                itemId = params[EXTRA_ID] as Int,
+                itemName = params[EXTRA_NAME] as String,
+                itemAccess = params[EXTRA_ACCESS] as Boolean,
+                parameter1 = params[EXTRA_PARAM1] as String,
+                parameter2 = params[EXTRA_PARAM2] as String?
+            )
         }
     }
 }

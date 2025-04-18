@@ -31,4 +31,6 @@
     <string name="returns">Return to library</string>
     <string name="fill_error">Fill in all fields</string>
     <string name="id_error">Element with this id already exists</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
