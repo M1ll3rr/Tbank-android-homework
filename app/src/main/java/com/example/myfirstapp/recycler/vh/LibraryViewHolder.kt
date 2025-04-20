@@ -6,11 +6,11 @@ import com.example.myfirstapp.library.LibraryItem
 
 class LibraryViewHolder(private val binding: ListItemBinding):
     RecyclerView.ViewHolder(binding.root) {
-    fun bind(libraryItem: LibraryItem) = with(binding) {
+    fun bind(libraryItem: LibraryItem) {
         bindId(libraryItem.id)
         bindName(libraryItem.name)
         bindIcon(libraryItem.iconId)
-        bindAccess(libraryItem.access)
+        return bindAccess(libraryItem.access)
     }
 
     fun bindId(newId: Int) = with(binding) {

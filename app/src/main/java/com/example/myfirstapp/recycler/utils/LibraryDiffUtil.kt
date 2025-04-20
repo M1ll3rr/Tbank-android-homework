@@ -1,30 +1,19 @@
 package com.example.myfirstapp.recycler.utils
 
+import android.annotation.SuppressLint
 import androidx.recyclerview.widget.DiffUtil
 import com.example.myfirstapp.library.LibraryItem
 
-class LibraryDiffUtil(
-    private val oldList: List<LibraryItem>,
-    private val newList: List<LibraryItem>
-    ): DiffUtil.Callback() {
-
-
-    override fun getOldListSize() = oldList.size
-
-    override fun getNewListSize() = newList.size
-
-    override fun areItemsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldList[oldItemPosition].id == newList[newItemPosition].id
+class LibraryDiffUtil: DiffUtil.ItemCallback<LibraryItem>() {
+    override fun areItemsTheSame(oldItem: LibraryItem, newItem: LibraryItem): Boolean {
+        return oldItem.id == newItem.id
     }
 
-    override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean {
-        return oldList[oldItemPosition] == newList[newItemPosition]
+    override fun areContentsTheSame(oldItem: LibraryItem, newItem: LibraryItem): Boolean {
+        return oldItem == newItem
     }
 
-    override fun getChangePayload(oldItemPosition: Int, newItemPosition: Int): Any? {
-        val oldItem = oldList[oldItemPosition]
-        val newItem = newList[newItemPosition]
-
+    override fun getChangePayload(oldItem: LibraryItem, newItem: LibraryItem): Any? {
         return when {
             oldItem.access != newItem.access -> LibraryAccessChange(newItem.access)
             oldItem.id != newItem.id -> LibraryIdChange(newItem.id)
