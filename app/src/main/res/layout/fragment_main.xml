@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
+    android:orientation="vertical"
     tools:context=".ui.MainFragment">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -45,14 +46,23 @@
             android:orientation="vertical">
 
             <include layout="@layout/shimmer_item" />
+
             <include layout="@layout/shimmer_item" />
+
             <include layout="@layout/shimmer_item" />
+
             <include layout="@layout/shimmer_item" />
+
             <include layout="@layout/shimmer_item" />
+
             <include layout="@layout/shimmer_item" />
+
             <include layout="@layout/shimmer_item" />
+
             <include layout="@layout/shimmer_item" />
+
             <include layout="@layout/shimmer_item" />
+
             <include layout="@layout/shimmer_item" />
         </LinearLayout>
 

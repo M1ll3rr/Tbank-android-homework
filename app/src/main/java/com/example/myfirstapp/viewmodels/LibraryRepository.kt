@@ -14,105 +14,50 @@ class LibraryRepository {
     private val _items = MutableStateFlow<List<LibraryItem>>(emptyList())
     val items: StateFlow<List<LibraryItem>> = _items
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
-
-    private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error
-
     private val errorFrequency = 5
 
-    private var lastAddedItem: LibraryItem? = null
-    private var lastRemovedItemPosition: Int? = null
-    private var lastUpdatedItemPosition: Int? = null
-    private var lastAction: ActionType? = null
-
-    val getLastAction: ActionType?
-        get() = lastAction
-
-    val getLastUpdatedPosition: Int?
-        get() = lastUpdatedItemPosition
-
-    val getLastAddedItem: LibraryItem?
-        get() = lastAddedItem
-
-    enum class ActionType {
-        LOAD, ADD, REMOVE, UPDATE
-    }
-
     suspend fun loadItems() {
-        _isLoading.value = true
-        _error.value = null
-        try {
-            lastAction = ActionType.LOAD
-            val result = withContext(Dispatchers.IO) {
-                delay(Random.nextLong(100, 2000))
-                databaseAccess(ERROR_DATABASE_LOAD)
-                LibraryData.items.sortedBy { it.id }
-            }
-            _items.value = result
-        } catch (e: Exception) {
-            _error.value = e.message
-        } finally {
-            _isLoading.value = false
+        val result = withContext(Dispatchers.IO) {
+            delay(Random.nextLong(100, 2000))
+            databaseAccess(ERROR_DATABASE_LOAD)
+            LibraryData.items.sortedBy { it.id }
         }
+        _items.value = result
     }
 
-    suspend fun addItem(item: LibraryItem) {
-        _error.value = null
-        try {
-            lastAction = ActionType.ADD
-            lastAddedItem = item
-            val result = withContext(Dispatchers.IO) {
-                databaseAccess(ERROR_DATABASE_ADD)
-                val oldList = _items.value.toMutableList()
-                oldList.add(item)
-                oldList.sortedBy { it.id }
-            }
-            _items.value = result
-        } catch (e: Exception) {
-            _error.value = e.message
+    suspend fun addItem(item: LibraryItem) : Int {
+        val result = withContext(Dispatchers.IO) {
+            databaseAccess(ERROR_DATABASE_ADD)
+            val oldList = _items.value.toMutableList()
+            oldList.add(item)
+            oldList.sortedBy { it.id }
         }
+        _items.value = result
+        return getItemPosition(item)
     }
 
     suspend fun removeItem(position: Int) {
-        _error.value = null
-        try {
-            lastAction = ActionType.REMOVE
-            lastRemovedItemPosition = position
-            val result = withContext(Dispatchers.IO) {
-                databaseAccess(ERROR_DATABASE_REMOVE)
-                val oldList = _items.value.toMutableList()
-                oldList.removeAt(position)
-                oldList.sortedBy { it.id }
-            }
-            _items.value = result
-        } catch (e: Exception) {
-            _error.value = e.message
+        val result = withContext(Dispatchers.IO) {
+            databaseAccess(ERROR_DATABASE_REMOVE)
+            val oldList = _items.value.toMutableList()
+            oldList.removeAt(position)
+            oldList.sortedBy { it.id }
         }
+        _items.value = result
     }
 
-    suspend fun updateItemAccess(position: Int) {
-        _error.value = null
-        try {
-            lastAction = ActionType.UPDATE
-            lastUpdatedItemPosition = position
-            val result = withContext(Dispatchers.IO) {
-                databaseAccess(ERROR_DATABASE_UPDATE)
-                val oldList = _items.value.toMutableList()
-                val newAccess = !oldList[position].access
-                oldList[position].access = newAccess
-                oldList
-            }
-            _items.value = result
-        } catch (e: Exception) {
-            _error.value = e.message
+    suspend fun updateItemAccess(position: Int) : Boolean {
+        val result = withContext(Dispatchers.IO) {
+            databaseAccess(ERROR_DATABASE_UPDATE)
+            val oldList = _items.value.toMutableList()
+            val newAccess = !oldList[position].access
+            oldList[position].access = newAccess
+            oldList
         }
+        _items.value = result
+        return true
     }
 
-    fun clearError() {
-        _error.value = null
-    }
 
     fun isIdExists(id: Int): Boolean {
         return _items.value.any { it.id == id }
@@ -120,16 +65,6 @@ class LibraryRepository {
 
     fun getItemPosition(item: LibraryItem?): Int {
         return _items.value.indexOfFirst { it.id == item?.id }
-    }
-
-    suspend fun repeatLastAction() {
-        when (lastAction) {
-            ActionType.LOAD -> loadItems()
-            ActionType.ADD -> addItem(lastAddedItem!!)
-            ActionType.REMOVE -> removeItem(lastRemovedItemPosition!!)
-            ActionType.UPDATE -> updateItemAccess(lastUpdatedItemPosition!!)
-            null -> _error.value = ERROR_UNKNOWN
-        }
     }
 
     private fun databaseAccess(message: String) {

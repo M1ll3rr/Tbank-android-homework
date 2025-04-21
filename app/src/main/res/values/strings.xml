@@ -32,6 +32,7 @@
 
     <string name="error_fill">Fill in all fields</string>
     <string name="error_id">Element with this id already exists</string>
+    <string name="error_db">Error loading database</string>
     <string name="error_db_remove">Error deleting item from database</string>
     <string name="error_db_add">Error adding item to database</string>
     <string name="error_db_load">Error loading data from database</string>
