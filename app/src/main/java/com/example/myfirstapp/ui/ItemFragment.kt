@@ -8,8 +8,10 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResult
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -22,8 +24,12 @@ import com.example.myfirstapp.library.Book
 import com.example.myfirstapp.library.Disk
 import com.example.myfirstapp.library.LibraryItem
 import com.example.myfirstapp.library.Newspaper
+import com.example.myfirstapp.viewmodels.LibraryRepository
 import com.example.myfirstapp.viewmodels.ViewModelFactory
+import com.google.android.material.snackbar.Snackbar
 import dev.androidbroadcast.vbpd.viewBinding
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 
 class ItemFragment : Fragment() {
@@ -34,6 +40,13 @@ class ItemFragment : Fragment() {
     }
     private val addMode by lazy {
         args.itemId == -1
+    }
+
+    private var itemJob: Job? = null
+
+    override fun onDestroy() {
+        itemJob?.cancel()
+        super.onDestroy()
     }
 
     override fun onCreateView(
@@ -48,6 +61,19 @@ class ItemFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         initButtons()
         setupViewSwitchers()
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.error.collect { errorHandler(it) }
+                }
+                launch {
+                    viewModel.isLoading.collect {
+                        if (it) binding.progressBar.visibility = View.VISIBLE
+                        else binding.progressBar.visibility = View.GONE
+                    }
+                }
+            }
+        }
     }
 
     private fun initButtons() {
@@ -65,7 +91,7 @@ class ItemFragment : Fragment() {
 
         actionButton.setOnClickListener {
             if (addMode) addNewItem()
-            else itemAction(access)
+            else itemAction()
         }
     }
 
@@ -240,13 +266,14 @@ class ItemFragment : Fragment() {
         }
     }
 
+
     private fun checkTypeFill(itemType: ItemTypes): Boolean {
         when (itemType) {
             ItemTypes.BOOK -> {
                 val author = binding.param1EditText.text.toString()
                 val numOfPage = binding.param2EditText.text.toString().toIntOrNull()
                 if (author.isEmpty() || numOfPage == null) {
-                    Toast.makeText(requireContext(), R.string.fill_error, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), R.string.error_fill, Toast.LENGTH_SHORT).show()
                     return true
                 }
             }
@@ -254,7 +281,7 @@ class ItemFragment : Fragment() {
                 val month = Months.entries[binding.param1Spinner.selectedItemPosition]
                 val numOfPub = binding.param2EditText.text.toString().toIntOrNull()
                 if (numOfPub == null) {
-                    Toast.makeText(requireContext(), R.string.fill_error, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), R.string.error_fill, Toast.LENGTH_SHORT).show()
                     return true
                 }
             }
@@ -270,13 +297,13 @@ class ItemFragment : Fragment() {
         val access = binding.accessSpinner.selectedItemPosition == 0
 
         if (id == null || name.isEmpty()) {
-            Toast.makeText(requireContext(), R.string.fill_error, Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.error_fill, Toast.LENGTH_SHORT).show()
             return
         }
         if (checkTypeFill(itemType)) return
 
         if (viewModel.isIdExists(id)) {
-            Toast.makeText(requireContext(), R.string.id_error, Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), R.string.error_id, Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -285,12 +312,14 @@ class ItemFragment : Fragment() {
             ItemTypes.NEWSPAPER -> createNewspaper(id, name, access)
             ItemTypes.DISK -> createDisk(id, name, access)
         }
-        viewModel.addItem(newItem)
-        val newPosition = viewModel.getNewItemPosition(newItem)
-        val bundle = Bundle()
-        bundle.putInt(EXTRA_NEW_ITEM_POS, newPosition)
-        setFragmentResult(NEW_ITEM_REQUEST, bundle)
-        findNavController().navigateUp()
+
+        itemJob = lifecycleScope.launch {
+            val newItemPos = viewModel.addItem(newItem)
+            if (newItemPos != -1) {
+                findNavController().previousBackStackEntry?.savedStateHandle?.set(EXTRA_NEW_ITEM_POS, newItemPos)
+                findNavController().navigateUp()
+            }
+        }
     }
 
     private fun createBook(id: Int, name: String, access: Boolean) : Book {
@@ -312,12 +341,24 @@ class ItemFragment : Fragment() {
         return Disk(id, name, diskType, access)
     }
 
-    private fun itemAction(access: Boolean) {
-        val newAccess = !access
-        val position = args.position
-        viewModel.updateItemAccess(position, newAccess)
-        findNavController().navigateUp()
+    private fun itemAction() {
+        itemJob = lifecycleScope.launch {
+            val result = viewModel.updateItemAccess(args.position)
+            if (result) findNavController().navigateUp()
+        }
     }
+
+
+
+    private fun errorHandler(error: String?) {
+        if (error != null) {
+            val errorMessage = LibraryRepository.errorMessages[error] ?: R.string.error_unknown
+            Snackbar.make(binding.root, errorMessage, Snackbar.LENGTH_SHORT)
+                .setAnchorView(binding.itemIcon)
+                .show()
+        }
+    }
+
 
     companion object {
         const val EXTRA_ITEM_TYPE = "itemTypeOrdinal"
@@ -328,7 +369,6 @@ class ItemFragment : Fragment() {
         const val EXTRA_PARAM1 = "parameter1"
         const val EXTRA_PARAM2 = "parameter2"
         const val EXTRA_NEW_ITEM_POS = "newItemPos"
-        const val NEW_ITEM_REQUEST = "newItemReq"
 
         fun createAction(item: LibraryItem, position: Int): NavDirections {
             val params = mutableMapOf<String, Any?>(

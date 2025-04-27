@@ -29,8 +29,16 @@
     <string name="take">Take</string>
     <string name="add">Add to library</string>
     <string name="returns">Return to library</string>
-    <string name="fill_error">Fill in all fields</string>
-    <string name="id_error">Element with this id already exists</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="error_fill">Fill in all fields</string>
+    <string name="error_id">Element with this id already exists</string>
+    <string name="error_db">Error loading database</string>
+    <string name="error_db_remove">Error deleting item from database</string>
+    <string name="error_db_add">Error adding item to database</string>
+    <string name="error_db_load">Error loading data from database</string>
+    <string name="error_db_update">Error editing data in database</string>
+    <string name="error_unknown">Unknown error</string>
+    <string name="reload">Reload</string>
+
+
 </resources>

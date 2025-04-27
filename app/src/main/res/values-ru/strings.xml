@@ -29,6 +29,13 @@
     <string name="take">Взять</string>
     <string name="add">Добавить в библиотеку</string>
     <string name="returns">Вернуть в библиотеку</string>
-    <string name="fill_error">Заполните все поля</string>
-    <string name="id_error">Элемент с таким id уже существует</string>
+    <string name="error_fill">Заполните все поля</string>
+    <string name="error_id">Элемент с таким id уже существует</string>
+    <string name="error_db">Ошибка при загрузке базы данных</string>
+    <string name="error_db_remove">Ошибка при удалении элемента из базы данных</string>
+    <string name="error_db_add">Ошибка при добавлении элемента в базу данных</string>
+    <string name="error_db_load">Ошибка при загрузке данных из базы данных</string>
+    <string name="error_db_update">Ошибка при редактирования данных в базе данных</string>
+    <string name="error_unknown">Неизвестная ошибка</string>
+    <string name="reload">Перезагрузить</string>
 </resources>

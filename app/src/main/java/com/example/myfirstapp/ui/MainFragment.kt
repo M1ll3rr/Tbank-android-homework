@@ -10,31 +10,32 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.setFragmentResultListener
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.myfirstapp.R
 import com.example.myfirstapp.databinding.FragmentMainBinding
-import com.example.myfirstapp.ui.ItemFragment.Companion.EXTRA_NEW_ITEM_POS
-import com.example.myfirstapp.ui.ItemFragment.Companion.NEW_ITEM_REQUEST
 import com.example.myfirstapp.recycler.adapters.LibraryAdapter
 import com.example.myfirstapp.recycler.itemtouchhelper.RemoveSwipeCallback
+import com.example.myfirstapp.ui.ItemFragment.Companion.EXTRA_NEW_ITEM_POS
+import com.example.myfirstapp.viewmodels.LibraryRepository
+import com.example.myfirstapp.viewmodels.LibraryRepository.Companion.ERROR_DATABASE_REMOVE
 import com.example.myfirstapp.viewmodels.ViewModelFactory
+import com.google.android.material.snackbar.Snackbar
 import dev.androidbroadcast.vbpd.viewBinding
+import kotlinx.coroutines.launch
 
 
 class MainFragment : Fragment(), MenuProvider {
     private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
-    private val libraryAdapter by lazy {
-        LibraryAdapter(findNavController())
-    }
+    private lateinit var libraryAdapter: LibraryAdapter
     private val viewModel by lazy {
         ViewModelProvider(this, ViewModelFactory())[MainViewModel::class.java]
     }
-    private var scrollPosition = 0
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -43,24 +44,34 @@ class MainFragment : Fragment(), MenuProvider {
         return inflater.inflate(R.layout.fragment_main, container, false)
     }
 
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setFragmentResultListener(NEW_ITEM_REQUEST) { _, bundle ->
-            scrollPosition = bundle.getInt(EXTRA_NEW_ITEM_POS)
-            with(binding.rcView) {
-                post { smoothScrollToPosition(scrollPosition) }
+        initToolbar()
+        initRecyclerView()
+        lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.isLoading.collect { if (it) startShimmer() else stopShimmer() }
+                }
+                launch {
+                    viewModel.items.collect {
+                        libraryAdapter.submitList(it)
+                        setNewScrollListener()
+                    }
+                }
+                launch {
+                    viewModel.error.collect {
+                        errorHandler(it)
+                    }
+                }
             }
         }
-        initToolbar()
-        initViewModel()
-        initRecyclerView()
     }
 
     override fun onPause() {
         super.onPause()
         val layoutManager = binding.rcView.layoutManager as LinearLayoutManager
-        scrollPosition = layoutManager.findFirstVisibleItemPosition()
+        viewModel.setScrollPosition(layoutManager.findFirstVisibleItemPosition())
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -87,23 +98,70 @@ class MainFragment : Fragment(), MenuProvider {
         requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
-
     private fun initRecyclerView() {
+        libraryAdapter = LibraryAdapter { item, position ->
+            val action = ItemFragment.createAction(item, position)
+            findNavController().navigate(action)
+        }
         with(binding.rcView) {
             layoutManager = LinearLayoutManager(context)
             adapter = libraryAdapter
-            scrollToPosition(scrollPosition)
+            scrollToPosition(viewModel.getScrollPosition)
             ItemTouchHelper(RemoveSwipeCallback {
                 viewModel.removeItem(it)
             }).attachToRecyclerView(this)
         }
     }
 
-    private fun initViewModel() {
-        viewModel.items.observe(viewLifecycleOwner) {
-            libraryAdapter.setNewData(it)
+    private fun startShimmer() {
+        with(binding) {
+            rcView.visibility = View.GONE
+            shimmerLayout.visibility = View.VISIBLE
+            shimmerLayout.startShimmer()
+        }
+    }
+
+    private fun stopShimmer() {
+        with(binding) {
+            shimmerLayout.stopShimmer()
+            shimmerLayout.visibility = View.GONE
+            rcView.visibility = View.VISIBLE
         }
     }
 
 
+    private fun errorHandler(error: String?) {
+        if (error != null) {
+            val errorMessage = LibraryRepository.errorMessages[error] ?: R.string.error_unknown
+            Snackbar.make(binding.root, errorMessage, Snackbar.LENGTH_INDEFINITE)
+                .setAction(requireContext().getString(R.string.reload)) {
+                    if (error == ERROR_DATABASE_REMOVE) {
+                        libraryAdapter.notifyDataSetChanged()
+                    }
+                    else {
+                        libraryAdapter.submitList(null)
+                        viewModel.loadItems()
+                    }
+                }
+                .show()
+        }
+
+    }
+
+    private fun setNewScrollListener() {
+        val newItemPos = findNavController().currentBackStackEntry?.savedStateHandle?.get<Int>(
+            EXTRA_NEW_ITEM_POS
+        ) ?: -1
+        if (newItemPos != -1) {
+            viewModel.setScrollPosition(newItemPos)
+            with(binding.rcView) {
+                post {
+                    smoothScrollToPosition(viewModel.getScrollPosition)
+                    findNavController().currentBackStackEntry?.savedStateHandle?.remove<Int>(EXTRA_NEW_ITEM_POS)
+                }
+            }
+        }
+    }
 }
+
+
