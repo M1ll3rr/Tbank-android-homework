@@ -40,5 +40,8 @@
     <string name="error_unknown">Unknown error</string>
     <string name="reload">Reload</string>
 
+    <string name="sort_by_name">Sort by name</string>
+    <string name="sort_by_date">Sort by date</string>
+    <string name="loading">Loading</string>
 
 </resources>

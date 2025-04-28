@@ -16,7 +16,7 @@ class ItemViewModel(private val repository: LibraryRepository) : ViewModel() {
     private var _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
-    fun isIdExists(id: Int): Boolean = repository.isIdExists(id)
+    suspend fun isIdExists(id: Int): Boolean = repository.isIdExists(id)
 
     suspend fun updateItemAccess(position: Int) : Boolean {
         try {

@@ -17,7 +17,9 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.myfirstapp.R
+import com.example.myfirstapp.data.SortType
 import com.example.myfirstapp.databinding.FragmentMainBinding
 import com.example.myfirstapp.recycler.adapters.LibraryAdapter
 import com.example.myfirstapp.recycler.itemtouchhelper.RemoveSwipeCallback
@@ -34,7 +36,8 @@ class MainFragment : Fragment(), MenuProvider {
     private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
     private lateinit var libraryAdapter: LibraryAdapter
     private val viewModel by lazy {
-        ViewModelProvider(this, ViewModelFactory())[MainViewModel::class.java]
+        val repository = (requireActivity() as MainActivity).getRepository()
+        ViewModelProvider(this, ViewModelFactory(repository))[MainViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -64,6 +67,11 @@ class MainFragment : Fragment(), MenuProvider {
                         errorHandler(it)
                     }
                 }
+                launch {
+                    viewModel.isLoadingMore.collect {
+                        if (it) showLoading() else hideLoading()
+                    }
+                }
             }
         }
     }
@@ -89,6 +97,14 @@ class MainFragment : Fragment(), MenuProvider {
                 findNavController().navigate(action)
                 true
             }
+            R.id.sort_by_name -> {
+                viewModel.setSortType(SortType.BY_NAME)
+                true
+            }
+            R.id.sort_by_date -> {
+                viewModel.setSortType(SortType.BY_DATE)
+                true
+            }
             else -> false
         }
     }
@@ -110,8 +126,17 @@ class MainFragment : Fragment(), MenuProvider {
             ItemTouchHelper(RemoveSwipeCallback {
                 viewModel.removeItem(it)
             }).attachToRecyclerView(this)
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    val layoutManager = recyclerView.layoutManager as LinearLayoutManager
+                    val firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
+                    viewModel.setScrollPosition(firstVisibleItemPosition)
+                }
+            })
         }
     }
+
 
     private fun startShimmer() {
         with(binding) {
@@ -129,6 +154,16 @@ class MainFragment : Fragment(), MenuProvider {
         }
     }
 
+    private fun showLoading() {
+        binding.paginationProgressBar.visibility = View.VISIBLE
+        binding.rcView.stopScroll()
+        binding.rcView.isNestedScrollingEnabled = false
+    }
+
+    private fun hideLoading() {
+        binding.paginationProgressBar.visibility = View.GONE
+        binding.rcView.isNestedScrollingEnabled = true
+    }
 
     private fun errorHandler(error: String?) {
         if (error != null) {
@@ -140,7 +175,7 @@ class MainFragment : Fragment(), MenuProvider {
                     }
                     else {
                         libraryAdapter.submitList(null)
-                        viewModel.loadItems()
+                        viewModel.loadDatabase()
                     }
                 }
                 .show()
