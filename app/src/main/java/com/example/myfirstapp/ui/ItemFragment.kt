@@ -28,15 +28,18 @@ import com.example.myfirstapp.viewmodels.LibraryRepository
 import com.example.myfirstapp.viewmodels.ViewModelFactory
 import com.google.android.material.snackbar.Snackbar
 import dev.androidbroadcast.vbpd.viewBinding
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class ItemFragment : Fragment() {
     private val binding: FragmentItemBinding by viewBinding(FragmentItemBinding::bind)
     private val args: ItemFragmentArgs by navArgs()
     private val viewModel by lazy {
-        ViewModelProvider(this, ViewModelFactory())[ItemViewModel::class.java]
+        val repository = (requireActivity() as MainActivity).getRepository()
+        ViewModelProvider(this, ViewModelFactory(repository))[ItemViewModel::class.java]
     }
     private val addMode by lazy {
         args.itemId == -1
@@ -302,18 +305,20 @@ class ItemFragment : Fragment() {
         }
         if (checkTypeFill(itemType)) return
 
-        if (viewModel.isIdExists(id)) {
-            Toast.makeText(requireContext(), R.string.error_id, Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val newItem = when (itemType) {
-            ItemTypes.BOOK -> createBook(id, name, access)
-            ItemTypes.NEWSPAPER -> createNewspaper(id, name, access)
-            ItemTypes.DISK -> createDisk(id, name, access)
-        }
-
         itemJob = lifecycleScope.launch {
+            if (viewModel.isIdExists(id)) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(requireContext(), R.string.error_id, Toast.LENGTH_SHORT).show()
+                }
+                return@launch
+            }
+
+            val newItem = when (itemType) {
+                ItemTypes.BOOK -> createBook(id, name, access)
+                ItemTypes.NEWSPAPER -> createNewspaper(id, name, access)
+                ItemTypes.DISK -> createDisk(id, name, access)
+            }
+
             val newItemPos = viewModel.addItem(newItem)
             if (newItemPos != -1) {
                 findNavController().previousBackStackEntry?.savedStateHandle?.set(EXTRA_NEW_ITEM_POS, newItemPos)

@@ -2,8 +2,10 @@ package com.example.myfirstapp.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.myfirstapp.data.SortType
 import com.example.myfirstapp.library.LibraryItem
 import com.example.myfirstapp.viewmodels.LibraryRepository
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,37 +18,82 @@ class MainViewModel(private val repository: LibraryRepository): ViewModel() {
     private var _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
 
+    private var _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore: StateFlow<Boolean> =  _isLoadingMore
+
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
     private var scrollPosition: Int = 0
+    private val loadMoreThreshold = 10
+
+    private var loadJob: Job? = null
 
     init {
-        loadItems()
+        loadDatabase()
     }
-
 
     val getScrollPosition: Int
         get() = scrollPosition
 
     fun setScrollPosition(position: Int) {
         scrollPosition = position
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
+            delay(300)
+            checkIfNeedToLoadMore(position)
+        }
     }
 
+    fun setSortType(sortType: SortType) {
+        viewModelScope.launch {
+            repository.userPreferencesRepository.saveSortType(sortType)
+        }
+    }
 
-    fun loadItems() = viewModelScope.launch {
-        var startTime = 0L
+    private fun checkIfNeedToLoadMore(position: Int) = viewModelScope.launch {
         val isLoadingJob = launch {
-            val remainingTime = 1000 - (System.currentTimeMillis() - startTime)
-            if (remainingTime > 0) delay(remainingTime)
+            delay(1000)
+            _isLoadingMore.value = false
+        }
+        val itemCount = items.value.size
+
+        if (itemCount - position <= loadMoreThreshold && itemCount > 0) {
+            try {
+                _error.value = null
+                _isLoadingMore.value = true
+                repository.loadMoreItems(isForward = true)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                _error.value = e.message
+            } finally {
+                isLoadingJob.join()
+            }
+        }
+        else if (position in 0..loadMoreThreshold && repository.getCurrentOffset != 0) {
+            try {
+                _error.value = null
+                _isLoadingMore.value = true
+                repository.loadMoreItems(isForward = false)
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                _error.value = e.message
+            } finally {
+                isLoadingJob.join()
+            }
+        }
+    }
+
+    fun loadDatabase() = viewModelScope.launch {
+        val isLoadingJob = launch {
+            delay(1000)
             _isLoading.value = false
         }
 
         try {
             _error.value = null
             _isLoading.value = true
-            startTime = System.currentTimeMillis()
-            repository.loadItems()
+            repository.initRepository()
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             _error.value = e.message

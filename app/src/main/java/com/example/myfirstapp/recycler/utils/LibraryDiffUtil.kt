@@ -1,6 +1,5 @@
 package com.example.myfirstapp.recycler.utils
 
-import android.annotation.SuppressLint
 import androidx.recyclerview.widget.DiffUtil
 import com.example.myfirstapp.library.LibraryItem
 

@@ -38,4 +38,9 @@
     <string name="error_db_update">Ошибка при редактирования данных в базе данных</string>
     <string name="error_unknown">Неизвестная ошибка</string>
     <string name="reload">Перезагрузить</string>
+
+    <string name="sort_by_name">По названию</string>
+    <string name="sort_by_date">По дате добавления</string>
+    <string name="loading">Загрузка</string>
+
 </resources>

@@ -6,6 +6,20 @@
         android:id="@+id/add_item"
         android:icon="@drawable/add_item"
         android:title=""
-        app:showAsAction="always" />
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/sort_menu"
+        android:icon="@drawable/sorticon"
+        android:title=""
+        app:showAsAction="ifRoom">
+        <menu>
+            <item
+                android:id="@+id/sort_by_name"
+                android:title="@string/sort_by_name" />
+            <item
+                android:id="@+id/sort_by_date"
+                android:title="@string/sort_by_date" />
+        </menu>
+    </item>
 
 </menu>
