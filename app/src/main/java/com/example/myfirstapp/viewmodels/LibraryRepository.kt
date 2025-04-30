@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Date
 
 class LibraryRepository(private val context: Context) {
     val userPreferencesRepository = UserPreferencesRepository(context)
@@ -38,7 +37,8 @@ class LibraryRepository(private val context: Context) {
 
     private var sortTypeJob: Job? = null
 
-
+    val getCurrentOffset: Int
+        get() = currentOffset
 
     fun initRepository() {
         CoroutineScope(Dispatchers.IO).launch {
@@ -59,8 +59,10 @@ class LibraryRepository(private val context: Context) {
 
     private suspend fun initDatabase() {
         withContext(Dispatchers.IO) {
-            val entities = LibraryData.items.map { EntityMapper.toEntity(it) }
-            dao.insertAll(entities)
+            if (dao.getItemsCount() == 0) {
+                val entities = LibraryData.items.map { EntityMapper.toEntity(it) }
+                dao.insertAll(entities)
+            }
             totalItems = dao.getItemsCount()
             loadItems()
         }
@@ -148,8 +150,14 @@ class LibraryRepository(private val context: Context) {
                 }
                 _items.value = oldList
             }
+            else {
+                val targetPage = globalPosition / pageSize
+                val newOffset = targetPage * pageSize
+                currentOffset = newOffset.coerceAtMost(dao.getItemsCount() - pageSize)
+                loadItems()
+            }
         }
-        return getItemPosition(item, entity.created)
+        return getItemPosition(item)
     }
 
     suspend fun removeItem(position: Int) {
@@ -187,20 +195,7 @@ class LibraryRepository(private val context: Context) {
         }
     }
 
-    private suspend fun getItemPosition(item: LibraryItem, created: Date): Int {
-        val localPosition = _items.value.indexOfFirst { it.id == item.id }
-        if (localPosition != -1) return localPosition
-
-        val globalPosition = when (sortType) {
-            SortType.BY_NAME -> dao.getPositionByName(item.name)
-            SortType.BY_DATE -> dao.getPositionByDate(created)
-        }
-
-        val targetPage = globalPosition / pageSize
-        val newOffset = targetPage * pageSize
-
-        currentOffset = newOffset
-        loadItems()
+    private fun getItemPosition(item: LibraryItem): Int {
         return _items.value.indexOfFirst { it.id == item.id }
     }
 

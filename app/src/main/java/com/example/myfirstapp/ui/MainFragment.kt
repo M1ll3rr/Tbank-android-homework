@@ -54,7 +54,9 @@ class MainFragment : Fragment(), MenuProvider {
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
-                    viewModel.isLoading.collect { if (it) startShimmer() else stopShimmer() }
+                    viewModel.isLoading.collect {
+                        if (it) startShimmer() else stopShimmer()
+                    }
                 }
                 launch {
                     viewModel.items.collect {
@@ -126,6 +128,7 @@ class MainFragment : Fragment(), MenuProvider {
             ItemTouchHelper(RemoveSwipeCallback {
                 viewModel.removeItem(it)
             }).attachToRecyclerView(this)
+            clearOnScrollListeners()
             addOnScrollListener(object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
@@ -188,10 +191,9 @@ class MainFragment : Fragment(), MenuProvider {
             EXTRA_NEW_ITEM_POS
         ) ?: -1
         if (newItemPos != -1) {
-            viewModel.setScrollPosition(newItemPos)
             with(binding.rcView) {
                 post {
-                    smoothScrollToPosition(viewModel.getScrollPosition)
+                    smoothScrollToPosition(newItemPos)
                     findNavController().currentBackStackEntry?.savedStateHandle?.remove<Int>(EXTRA_NEW_ITEM_POS)
                 }
             }
