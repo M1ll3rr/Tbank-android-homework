@@ -8,7 +8,7 @@ import com.example.myfirstapp.library.LibraryItem
 import com.example.myfirstapp.recycler.utils.LibraryDiffUtil
 import com.example.myfirstapp.recycler.vh.LibraryViewHolder
 
-class LibraryAdapter(private val onClick: (LibraryItem, Int) -> Unit):
+class LibraryAdapter(private val onClick: (LibraryItem, Int) -> Unit, private val onLongClick: (LibraryItem) -> Unit):
     ListAdapter<LibraryItem, LibraryViewHolder>(LibraryDiffUtil()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LibraryViewHolder {
@@ -22,6 +22,11 @@ class LibraryAdapter(private val onClick: (LibraryItem, Int) -> Unit):
         holder.bind(item)
         holder.itemView.setOnClickListener {
             onClick(item, position)
+        }
+
+        holder.itemView.setOnLongClickListener {
+            onLongClick(item)
+            true
         }
     }
 
