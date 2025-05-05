@@ -22,10 +22,13 @@
 
         <TextView
             android:id="@+id/itemId"
-            android:layout_width="wrap_content"
+            android:layout_width="48dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
+            android:ellipsize="start"
+            android:maxLines="1"
             android:text="item id"
+            android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="16sp"
             android:textStyle="italic"
@@ -35,10 +38,13 @@
 
         <TextView
             android:id="@+id/itemName"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
+            android:ellipsize="end"
+            android:maxLines="3"
             android:text="item name"
+            android:textAlignment="center"
             android:textColor="@color/black"
             android:textSize="16sp"
             android:textStyle="bold"

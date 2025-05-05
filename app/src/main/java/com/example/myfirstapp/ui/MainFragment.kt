@@ -1,14 +1,21 @@
 package com.example.myfirstapp.ui
 
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.MenuProvider
+import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
@@ -39,6 +46,9 @@ class MainFragment : Fragment(), MenuProvider {
         val repository = (requireActivity() as MainActivity).getRepository()
         ViewModelProvider(this, ViewModelFactory(repository))[MainViewModel::class.java]
     }
+    private var menu: Menu? = null
+    private var isReturned = false
+    private var isLocal = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -51,11 +61,12 @@ class MainFragment : Fragment(), MenuProvider {
         super.onViewCreated(view, savedInstanceState)
         initToolbar()
         initRecyclerView()
+        initButtons()
         lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.isLoading.collect {
-                        if (it) startShimmer() else stopShimmer()
+                        updateShimmer(it)
                     }
                 }
                 launch {
@@ -71,7 +82,7 @@ class MainFragment : Fragment(), MenuProvider {
                 }
                 launch {
                     viewModel.isLoadingMore.collect {
-                        if (it) showLoading() else hideLoading()
+                        updateLoading(it)
                     }
                 }
             }
@@ -84,8 +95,15 @@ class MainFragment : Fragment(), MenuProvider {
         viewModel.setScrollPosition(layoutManager.findFirstVisibleItemPosition())
     }
 
+    override fun onResume() {
+        super.onResume()
+        isReturned = false
+    }
+
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        this.menu = menu
         menuInflater.inflate(R.menu.main_menu, menu)
+        updateMenuItems(isLocal)
     }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -96,6 +114,7 @@ class MainFragment : Fragment(), MenuProvider {
                     parameter1 = null,
                     parameter2 = null
                 )
+                isReturned = true
                 findNavController().navigate(action)
                 true
             }
@@ -111,16 +130,36 @@ class MainFragment : Fragment(), MenuProvider {
         }
     }
 
+    private fun updateMenuItems(visibility: Boolean) {
+        menu?.let {
+            it.findItem(R.id.add_item)?.isVisible = visibility
+            it.findItem(R.id.sort_menu)?.isVisible = visibility
+        }
+    }
+
     private fun initToolbar() {
         (requireActivity() as AppCompatActivity).setSupportActionBar(binding.toolbar)
         requireActivity().addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
     private fun initRecyclerView() {
-        libraryAdapter = LibraryAdapter { item, position ->
-            val action = ItemFragment.createAction(item, position)
-            findNavController().navigate(action)
-        }
+        libraryAdapter = LibraryAdapter(
+            onClick = { item, position ->
+                val action = ItemFragment.createAction(item, position)
+                isReturned = true
+                findNavController().navigate(action)
+            },
+            onLongClick = { item ->
+                if (!isLocal) {
+                    lifecycleScope.launch {
+                        val success = viewModel.addItem(item)
+                        if (success) {
+                            Toast.makeText(requireContext(), getString(R.string.item_added), Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        )
         with(binding.rcView) {
             layoutManager = LinearLayoutManager(context)
             adapter = libraryAdapter
@@ -140,48 +179,110 @@ class MainFragment : Fragment(), MenuProvider {
         }
     }
 
-
-    private fun startShimmer() {
+    private fun initButtons() {
         with(binding) {
-            rcView.visibility = View.GONE
-            shimmerLayout.visibility = View.VISIBLE
-            shimmerLayout.startShimmer()
+            buttonGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+                if (paginationProgressBar.isVisible) paginationProgressBar.visibility = View.GONE
+
+                if (checkedId == R.id.libraryButton && isChecked) {
+                    Log.d("test", "libraryButton")
+                    isLocal = true
+                    searchFieldsLayout.visibility = View.GONE
+                    if (isReturned) return@addOnButtonCheckedListener
+                    updateMenuItems(true)
+                    viewModel.loadLocalItems()
+                }
+                else if (checkedId == R.id.googleBooksButton && isChecked) {
+                    Log.d("test", "googleBooksButton")
+                    isLocal = false
+                    if (shimmerLayout.isVisible) shimmerLayout.visibility = View.GONE
+                    rcView.visibility = View.INVISIBLE
+                    searchFieldsLayout.visibility = View.VISIBLE
+                    if (isReturned) return@addOnButtonCheckedListener
+                    updateMenuItems(false)
+                    viewModel.clearItems()
+                }
+            }
+            titleEditText.addTextChangedListener {
+                validateInput()
+            }
+            authorEditText.addTextChangedListener {
+                validateInput()
+            }
+            searchButton.setOnClickListener {
+                val author = binding.authorEditText.text.toString().trim()
+                val title = binding.titleEditText.text.toString().trim()
+                val inputMethodManager = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+                inputMethodManager.hideSoftInputFromWindow(view?.windowToken, 0)
+                titleEditText.clearFocus()
+                authorEditText.clearFocus()
+                viewModel.searchGoogleBooks(title, author)
+            }
+            titleEditText.setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_SEARCH && searchButton.isEnabled) {
+                    searchButton.performClick()
+                    true
+                } else {
+                    false
+                }
+            }
+            authorEditText.setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_SEARCH && searchButton.isEnabled) {
+                    searchButton.performClick()
+                    true
+                } else {
+                    false
+                }
+            }
         }
     }
 
-    private fun stopShimmer() {
+
+    private fun validateInput() {
         with(binding) {
-            shimmerLayout.stopShimmer()
-            shimmerLayout.visibility = View.GONE
-            rcView.visibility = View.VISIBLE
+            val isTitleValid = titleEditText.text.toString().trim().length >= 3
+            val isAuthorValid = authorEditText.text.toString().trim().length >= 3
+            searchButton.isEnabled = isTitleValid || isAuthorValid
         }
     }
 
-    private fun showLoading() {
-        binding.paginationProgressBar.visibility = View.VISIBLE
-        binding.rcView.stopScroll()
-        binding.rcView.isNestedScrollingEnabled = false
+
+    private fun updateShimmer(isLoading: Boolean) {
+        with(binding) {
+            rcView.visibility = if (isLoading) View.INVISIBLE else View.VISIBLE
+            shimmerLayout.visibility = if (isLoading) View.VISIBLE else View.GONE
+            shimmerLayout.showShimmer(isLoading)
+        }
     }
 
-    private fun hideLoading() {
-        binding.paginationProgressBar.visibility = View.GONE
-        binding.rcView.isNestedScrollingEnabled = true
+    private fun updateLoading(isLoading: Boolean) {
+        with(binding) {
+            paginationProgressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            if (isLoading) rcView.stopScroll()
+            rcView.isNestedScrollingEnabled = !isLoading
+        }
     }
 
     private fun errorHandler(error: String?) {
         if (error != null) {
-            val errorMessage = LibraryRepository.errorMessages[error] ?: R.string.error_unknown
-            Snackbar.make(binding.root, errorMessage, Snackbar.LENGTH_INDEFINITE)
-                .setAction(requireContext().getString(R.string.reload)) {
-                    if (error == ERROR_DATABASE_REMOVE) {
-                        libraryAdapter.notifyDataSetChanged()
+            if (isLocal) {
+                val errorMessage = LibraryRepository.errorMessages[error] ?: R.string.error_unknown
+                Snackbar.make(binding.root, errorMessage, Snackbar.LENGTH_INDEFINITE)
+                    .setAction(requireContext().getString(R.string.reload)) {
+                        if (error == ERROR_DATABASE_REMOVE) {
+                            libraryAdapter.notifyDataSetChanged()
+                        }
+                        else {
+                            libraryAdapter.submitList(null)
+                            viewModel.loadDatabase()
+                        }
                     }
-                    else {
-                        libraryAdapter.submitList(null)
-                        viewModel.loadDatabase()
-                    }
-                }
-                .show()
+                    .show()
+            }
+            else {
+                Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT)
+                    .show()
+            }
         }
 
     }

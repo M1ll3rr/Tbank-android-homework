@@ -29,6 +29,9 @@
     <string name="take">Взять</string>
     <string name="add">Добавить в библиотеку</string>
     <string name="returns">Вернуть в библиотеку</string>
+    <string name="item_added">Предмет добавлен в библиотеку</string>
+
+    <string name="error">Ошибка</string>
     <string name="error_fill">Заполните все поля</string>
     <string name="error_id">Элемент с таким id уже существует</string>
     <string name="error_db">Ошибка при загрузке базы данных</string>
@@ -42,5 +45,19 @@
     <string name="sort_by_name">По названию</string>
     <string name="sort_by_date">По дате добавления</string>
     <string name="loading">Загрузка</string>
+    <string name="my_library">Моя библиотека</string>
+    <string name="google_books">Google Книги</string>
+    <string name="search">Поиск</string>
+    <string name="unknown">Неизвестен</string>
+    <string name="empty_search">Пустой поисковый запрос</string>
+    <string name="error_timeout">Превышено время ожидания от сервера</string>
+    <string name="error_connection">Проблемы с подключением. Проверьте интернет-соединение.</string>
+    <string name="error_400">Некорректный запрос</string>
+    <string name="error_403">Доступ запрещен</string>
+    <string name="error_404">Результат не найдены</string>
+    <string name="error_500">Ошибка на сервере</string>
+    <string name="error_502">Ошибка шлюза</string>
+    <string name="error_503">Сервер не доступен</string>
+
 
 </resources>
