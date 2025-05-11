@@ -65,8 +65,6 @@ dependencies {
     implementation(libs.room)
     implementation(libs.room.runtime)
     implementation(libs.androidx.databinding.adapters)
-    implementation(project(":domain"))
-    implementation(project(":data"))
     annotationProcessor(libs.room.compiler)
     ksp(libs.room.compiler)
     implementation(libs.androidx.datastore.preferences)
