@@ -19,6 +19,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import retrofit2.HttpException
+import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 class LibraryRepository(private val context: Context) {
     val userPreferencesRepository = UserPreferencesRepository(context)
@@ -155,7 +158,7 @@ class LibraryRepository(private val context: Context) {
     private suspend fun loadApiPage(title: String, author: String, offset: Int, limit: Int): List<LibraryItem> {
         val query = buildQuery(title, author)
 
-        val result = withContext(Dispatchers.IO) {
+        val result =
             try {
                 val response = RetrofitClient.apiService.searchBooks(
                     query = query,
@@ -164,18 +167,20 @@ class LibraryRepository(private val context: Context) {
                 )
 
                 if (response.isSuccessful) {
-                    val books = response.body()?.items?.map { item ->
-                        Book(
-                            name = item.volumeInfo.title,
-                            author = item.volumeInfo.authors?.joinToString(", ")
-                                ?: context.getString(R.string.unknown),
-                            numOfPage = item.volumeInfo.pageCount ?: 0,
-                            id = item.volumeInfo.industryIdentifiers
-                                ?.find { it.type == idType }
-                                ?.identifier?.toIntOrNull()
-                                ?: getHashCode(item)
-                        )
-                    } ?: emptyList()
+                    val books = withContext(Dispatchers.Default) {
+                        response.body()?.items?.map { item ->
+                            Book(
+                                name = item.volumeInfo.title,
+                                author = item.volumeInfo.authors?.joinToString(", ")
+                                    ?: context.getString(R.string.unknown),
+                                numOfPage = item.volumeInfo.pageCount ?: 0,
+                                id = item.volumeInfo.industryIdentifiers
+                                    ?.find { it.type == idType }
+                                    ?.identifier?.toIntOrNull()
+                                    ?: getHashCode(item)
+                            )
+                        } ?: emptyList()
+                    }
                     canLoadMoreApi = books.size == limit
                     books
                 } else {
@@ -190,24 +195,15 @@ class LibraryRepository(private val context: Context) {
                     }
                     throw Exception(errorMsg)
                 }
+            } catch (e: UnknownHostException) {
+                throw Exception(context.getString(R.string.error_connection))
+            } catch (e: SocketTimeoutException) {
+                throw Exception(context.getString(R.string.error_timeout))
+            } catch (e: HttpException) {
+                throw Exception(context.getString(R.string.error_500))
             } catch (e: Exception) {
-                when (e) {
-                    is java.net.UnknownHostException -> {
-                        throw Exception(context.getString(R.string.error_connection))
-                    }
-                    is java.net.SocketTimeoutException -> {
-                        throw Exception(context.getString(R.string.error_timeout))
-                    }
-                    is retrofit2.HttpException -> {
-                        val errorMessage = "${context.getString(R.string.error_500)}: ${e.message()}"
-                        throw Exception(errorMessage)
-                    }
-                    else -> {
-                        throw Exception("${context.getString(R.string.error_unknown)}: ${e.localizedMessage}")
-                    }
-                }
+                throw Exception("${context.getString(R.string.error_unknown)}: ${e.localizedMessage}")
             }
-        }
         return result
     }
 
@@ -357,7 +353,7 @@ class LibraryRepository(private val context: Context) {
     }
 
     private fun getHashCode(item: GoogleBookItem) : Int {
-        val title = item.volumeInfo.title.orEmpty()
+        val title = item.volumeInfo.title
         val author = item.volumeInfo.authors.orEmpty()
         return (title + author).hashCode().and(0x7FFFFFFF)
     }
