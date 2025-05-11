@@ -273,7 +273,7 @@ class ItemFragment : Fragment() {
     private fun checkTypeFill(itemType: ItemTypes): Boolean {
         when (itemType) {
             ItemTypes.BOOK -> {
-                val author = binding.param1EditText.text.toString()
+                val author = binding.param1EditText.text.toString().trim()
                 val numOfPage = binding.param2EditText.text.toString().toIntOrNull()
                 if (author.isEmpty() || numOfPage == null) {
                     Toast.makeText(requireContext(), R.string.error_fill, Toast.LENGTH_SHORT).show()
@@ -296,7 +296,7 @@ class ItemFragment : Fragment() {
     private fun addNewItem() {
         val itemType = ItemTypes.entries[binding.typeNameSpinner.selectedItemPosition]
         val id = binding.idEditText.text.toString().toIntOrNull()
-        val name = binding.nameEditText.text.toString()
+        val name = binding.nameEditText.text.toString().trim()
         val access = binding.accessSpinner.selectedItemPosition == 0
 
         if (id == null || name.isEmpty()) {
@@ -328,7 +328,7 @@ class ItemFragment : Fragment() {
     }
 
     private fun createBook(id: Int, name: String, access: Boolean) : Book {
-        val author = binding.param1EditText.text.toString()
+        val author = binding.param1EditText.text.toString().trim()
         val numOfPage = binding.param2EditText.text.toString().toInt()
         return Book(id, name, author, numOfPage, access)
     }

@@ -69,6 +69,10 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.androidx.datastore.preferences)
 
+    implementation(libs.squareup.retrofit)
+    implementation(libs.converter.gson)
+    implementation("com.squareup.okhttp3:logging-interceptor:4.9.3")
+
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

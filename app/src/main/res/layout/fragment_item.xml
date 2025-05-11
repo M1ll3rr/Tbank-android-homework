@@ -4,10 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:orientation="vertical"
-    tools:layout_editor_absoluteX="1dp"
-    tools:layout_editor_absoluteY="1dp">
+    android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -104,25 +101,27 @@
 
         <ViewSwitcher
             android:id="@+id/idSwitcher"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintBottom_toBottomOf="@+id/id_title"
             app:layout_constraintStart_toEndOf="@+id/id_title"
-            app:layout_constraintTop_toTopOf="@+id/id_title">
+            app:layout_constraintTop_toTopOf="@+id/id_title"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <TextView
                 android:id="@+id/idTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_gravity="start|center_vertical"
                 android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/idEditText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_gravity="start|center_vertical"
                 android:inputType="number"
                 android:textSize="16sp" />
         </ViewSwitcher>
@@ -157,25 +156,29 @@
 
         <ViewSwitcher
             android:id="@+id/nameSwitcher"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintBottom_toBottomOf="@+id/name_title"
             app:layout_constraintStart_toEndOf="@+id/name_title"
-            app:layout_constraintTop_toTopOf="@+id/name_title">
+            app:layout_constraintTop_toTopOf="@+id/name_title"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <TextView
                 android:id="@+id/nameTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_gravity="start|center_vertical"
+                android:ellipsize="end"
+                android:maxLines="3"
                 android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/nameEditText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_gravity="start|center_vertical"
                 android:inputType="text"
                 android:textSize="16sp" />
 
@@ -183,17 +186,22 @@
 
         <FrameLayout
             android:id="@+id/param1Container"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintBottom_toBottomOf="@+id/parameter1_title"
             app:layout_constraintStart_toEndOf="@+id/parameter1_title"
-            app:layout_constraintTop_toTopOf="@+id/parameter1_title">
+            app:layout_constraintTop_toTopOf="@+id/parameter1_title"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <TextView
                 android:id="@+id/param1TextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="start|center_vertical"
+                android:ellipsize="end"
+                android:maxLines="3"
                 android:textSize="16sp"
                 android:visibility="gone" />
 
@@ -202,37 +210,42 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16sp"
+                android:layout_gravity="start|center_vertical"
+                android:inputType="text"
                 android:visibility="gone" />
 
             <Spinner
                 android:id="@+id/param1Spinner"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="start|center_vertical"
                 android:textSize="16sp"
                 android:visibility="gone" />
         </FrameLayout>
 
         <ViewSwitcher
             android:id="@+id/param2Switcher"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="32dp"
+            android:layout_marginEnd="16dp"
             app:layout_constraintBottom_toBottomOf="@+id/parameter2_title"
             app:layout_constraintStart_toEndOf="@+id/parameter2_title"
-            app:layout_constraintTop_toTopOf="@+id/parameter2_title">
+            app:layout_constraintTop_toTopOf="@+id/parameter2_title"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <TextView
                 android:id="@+id/param2TextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_gravity="start|center_vertical"
                 android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/param2EditText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_gravity="start|center_vertical"
                 android:inputType="number"
                 android:textSize="16sp" />
 
