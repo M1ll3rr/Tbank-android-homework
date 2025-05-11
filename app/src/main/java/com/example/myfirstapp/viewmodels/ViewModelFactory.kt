@@ -2,10 +2,9 @@ package com.example.myfirstapp.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.example.myfirstapp.ui.ItemViewModel
-import com.example.myfirstapp.ui.MainViewModel
+import com.example.data.repository.LibraryRepositoryImpl
 
-class ViewModelFactory(private val repository: LibraryRepository) : ViewModelProvider.Factory {
+class ViewModelFactory(private val repository: LibraryRepositoryImpl) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
             modelClass.isAssignableFrom(MainViewModel::class.java) -> MainViewModel(repository) as T
