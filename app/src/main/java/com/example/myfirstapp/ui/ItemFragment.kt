@@ -40,8 +40,8 @@ class ItemFragment : Fragment() {
     private val args: ItemFragmentArgs by navArgs()
     private val resourceMapper by lazy { ResourceMapper(requireContext()) }
     private val viewModel by lazy {
-        val repository = (requireActivity() as MainActivity).getRepository()
-        ViewModelProvider(this, ViewModelFactory(repository))[ItemViewModel::class.java]
+        val libraryUseCases = (requireActivity() as MainActivity).getLibraryUseCases
+        ViewModelProvider(this, ViewModelFactory(libraryUseCases))[ItemViewModel::class.java]
     }
     private val addMode by lazy {
         args.itemId == -1

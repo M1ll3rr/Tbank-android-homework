@@ -1,11 +1,11 @@
 package com.example.data.repository
 
 import android.content.Context
-import com.example.data.mappers.AppError
-import com.example.data.localdata.LibraryData
 import com.example.data.database.LibraryDatabase
 import com.example.data.database.LibraryItemEntity
 import com.example.data.googlebooks.GoogleBookItem
+import com.example.data.localdata.LibraryData
+import com.example.data.mappers.AppError
 import com.example.data.mappers.EntityMapper
 import com.example.domain.entities.Book
 import com.example.domain.entities.LibraryItem
@@ -23,7 +23,7 @@ import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 
 class LibraryRepositoryImpl(private val context: Context) : LibraryRepository {
-    val userPreferencesRepository = UserPreferencesRepositoryImpl(context)
+    override val userPreferencesRepository = UserPreferencesRepositoryImpl(context)
     private var sortType: SortType = SortType.BY_NAME
 
     private val _items = MutableStateFlow<List<LibraryItem>>(emptyList())
@@ -47,10 +47,10 @@ class LibraryRepositoryImpl(private val context: Context) : LibraryRepository {
     private var sortTypeJob: Job? = null
     private val idType = "ISBN_10"
 
-    val getCurrentOffset: Int
+    override val getCurrentOffset: Int
         get() = currentOffset
 
-    val getCurrentApiOffset: Int
+    override val getCurrentApiOffset: Int
         get() = currentApiOffset
 
     override fun initRepository() {
@@ -281,7 +281,7 @@ class LibraryRepositoryImpl(private val context: Context) : LibraryRepository {
         return getItemPosition(item)
     }
 
-    suspend fun addItemToLocal(item: LibraryItem) : Boolean {
+    override suspend fun addItemToLocal(item: LibraryItem) : Boolean {
         val entity = EntityMapper.toEntity(item)
         withContext(Dispatchers.IO) {
             if (dao.isIdExists(item.id))

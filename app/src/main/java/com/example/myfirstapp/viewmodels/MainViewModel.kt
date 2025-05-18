@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.domain.entities.LibraryItem
 import com.example.domain.types.SortType
+import com.example.domain.usecases.LibraryUseCases
+import com.example.domain.usecases.PreferencesUseCases
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -11,8 +13,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlin.coroutines.cancellation.CancellationException
 
-class MainViewModel(private val repository: com.example.data.repository.LibraryRepositoryImpl): ViewModel() {
-    val items: StateFlow<List<LibraryItem>> = repository.items
+class MainViewModel(private val libraryUseCases: LibraryUseCases,
+                    private val preferencesUseCases: PreferencesUseCases
+): ViewModel() {
+    val items: StateFlow<List<LibraryItem>> = libraryUseCases.observeItems()
 
     private var _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -49,7 +53,7 @@ class MainViewModel(private val repository: com.example.data.repository.LibraryR
 
     fun setSortType(sortType: SortType) {
         viewModelScope.launch {
-            repository.userPreferencesRepository.saveSortType(sortType)
+            preferencesUseCases.saveSortType(sortType)
         }
     }
 
@@ -65,10 +69,10 @@ class MainViewModel(private val repository: com.example.data.repository.LibraryR
                 _error.value = null
                 _isLoadingMore.value = true
                 if (isLoadMoreApi()) {
-                    repository.loadMoreApi(lastTitle, lastAuthor, isForward = true)
+                    libraryUseCases.loadMoreApi(lastTitle, lastAuthor, isForward = true)
                 }
                 else {
-                    repository.loadMoreLocal(isForward = true)
+                    libraryUseCases.loadMoreLocal(true)
                 }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
@@ -77,15 +81,15 @@ class MainViewModel(private val repository: com.example.data.repository.LibraryR
                 isLoadingJob.join()
             }
         }
-        else if (position in 0..loadMoreThreshold && (repository.getCurrentOffset != 0 || repository.getCurrentApiOffset != 0)) {
+        else if (position in 0..loadMoreThreshold && (libraryUseCases.getCurrentOffset() != 0 || libraryUseCases.getCurrentApiOffset() != 0)) {
             try {
                 _error.value = null
                 _isLoadingMore.value = true
                 if (isLoadMoreApi()) {
-                    repository.loadMoreApi(lastTitle, lastAuthor, isForward = false)
+                    libraryUseCases.loadMoreApi(lastTitle, lastAuthor, isForward = false)
                 }
                 else {
-                    repository.loadMoreLocal(isForward = false)
+                    libraryUseCases.loadMoreLocal(false)
                 }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
@@ -105,7 +109,7 @@ class MainViewModel(private val repository: com.example.data.repository.LibraryR
         try {
             _error.value = null
             _isLoading.value = true
-            repository.initRepository()
+            libraryUseCases.initializeLibrary()
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             _error.value = e.message
@@ -126,7 +130,7 @@ class MainViewModel(private val repository: com.example.data.repository.LibraryR
             lastTitle = ""
             lastAuthor = ""
             clearItems()
-            repository.loadLocalItems()
+            libraryUseCases.getLocalItems()
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             _error.value = e.message
@@ -146,7 +150,7 @@ class MainViewModel(private val repository: com.example.data.repository.LibraryR
         try {
             _error.value = null
             _isLoading.value = true
-            repository.loadApiItems(title, author)
+            libraryUseCases.searchBooks(title, author)
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             _error.value = e.message
@@ -159,7 +163,7 @@ class MainViewModel(private val repository: com.example.data.repository.LibraryR
     fun removeItem(position: Int) = viewModelScope.launch {
         try {
             _error.value = null
-            repository.removeItem(position)
+            libraryUseCases.removeItem(position)
         } catch (e: Exception) {
             if (e is CancellationException) throw e
             _error.value = e.message
@@ -169,7 +173,7 @@ class MainViewModel(private val repository: com.example.data.repository.LibraryR
     suspend fun addItem(item: LibraryItem) : Boolean {
         return try {
             _error.value = null
-            val success = repository.addItemToLocal(item)
+            val success = libraryUseCases.addItemToLocal(item)
             success
         }
         catch (e: Exception) {
@@ -179,7 +183,7 @@ class MainViewModel(private val repository: com.example.data.repository.LibraryR
         }
     }
 
-    fun clearItems() = repository.clearItems()
+    fun clearItems() = libraryUseCases.clearLibrary()
 
     private fun isLoadMoreApi() : Boolean {
         return lastTitle.isNotEmpty() || lastAuthor.isNotEmpty()

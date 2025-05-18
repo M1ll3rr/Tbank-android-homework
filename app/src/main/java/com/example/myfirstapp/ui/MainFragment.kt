@@ -43,8 +43,9 @@ class MainFragment : Fragment(), MenuProvider {
     private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
     private lateinit var libraryAdapter: LibraryAdapter
     private val viewModel by lazy {
-        val repository = (requireActivity() as MainActivity).getRepository()
-        ViewModelProvider(this, ViewModelFactory(repository))[MainViewModel::class.java]
+        val libraryUseCases = (requireActivity() as MainActivity).getLibraryUseCases
+        val preferencesUseCases = (requireActivity() as MainActivity).getPreferencesUseCases
+        ViewModelProvider(this, ViewModelFactory(libraryUseCases, preferencesUseCases))[MainViewModel::class.java]
     }
     private val resourceMapper by lazy { ResourceMapper(requireContext()) }
 
