@@ -70,6 +70,8 @@ dependencies {
     annotationProcessor(libs.room.compiler)
     ksp(libs.room.compiler)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.dagger)
+    ksp(libs.dagger.compiler)
 
     implementation(libs.squareup.retrofit)
     implementation(libs.converter.gson)
