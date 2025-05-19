@@ -53,6 +53,8 @@ dependencies {
     implementation(libs.firebase.crashlytics.buildtools)
     implementation(libs.squareup.retrofit)
     implementation(libs.converter.gson)
+    implementation(libs.dagger)
+    ksp(libs.dagger.compiler)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
