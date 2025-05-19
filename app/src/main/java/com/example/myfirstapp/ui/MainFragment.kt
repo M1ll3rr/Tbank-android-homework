@@ -25,14 +25,14 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.domain.types.SortType
 import com.example.myfirstapp.R
-import com.example.myfirstapp.data.SortType
 import com.example.myfirstapp.databinding.FragmentMainBinding
-import com.example.myfirstapp.recycler.adapters.LibraryAdapter
-import com.example.myfirstapp.recycler.itemtouchhelper.RemoveSwipeCallback
+import com.example.myfirstapp.mappers.ResourceMapper
+import com.example.myfirstapp.recycler.LibraryAdapter
+import com.example.myfirstapp.recycler.RemoveSwipeCallback
 import com.example.myfirstapp.ui.ItemFragment.Companion.EXTRA_NEW_ITEM_POS
-import com.example.myfirstapp.viewmodels.LibraryRepository
-import com.example.myfirstapp.viewmodels.LibraryRepository.Companion.ERROR_DATABASE_REMOVE
+import com.example.myfirstapp.viewmodels.MainViewModel
 import com.example.myfirstapp.viewmodels.ViewModelFactory
 import com.google.android.material.snackbar.Snackbar
 import dev.androidbroadcast.vbpd.viewBinding
@@ -43,9 +43,12 @@ class MainFragment : Fragment(), MenuProvider {
     private val binding: FragmentMainBinding by viewBinding(FragmentMainBinding::bind)
     private lateinit var libraryAdapter: LibraryAdapter
     private val viewModel by lazy {
-        val repository = (requireActivity() as MainActivity).getRepository()
-        ViewModelProvider(this, ViewModelFactory(repository))[MainViewModel::class.java]
+        val libraryUseCases = (requireActivity() as MainActivity).getLibraryUseCases
+        val preferencesUseCases = (requireActivity() as MainActivity).getPreferencesUseCases
+        ViewModelProvider(this, ViewModelFactory(libraryUseCases, preferencesUseCases))[MainViewModel::class.java]
     }
+    private val resourceMapper by lazy { ResourceMapper(requireContext()) }
+
     private var menu: Menu? = null
     private var isReturned = false
     private var isLocal = true
@@ -266,16 +269,11 @@ class MainFragment : Fragment(), MenuProvider {
     private fun errorHandler(error: String?) {
         if (error != null) {
             if (isLocal) {
-                val errorMessage = LibraryRepository.errorMessages[error] ?: R.string.error_unknown
+                val errorMessage = resourceMapper.getErrorMessage(error)
                 Snackbar.make(binding.root, errorMessage, Snackbar.LENGTH_INDEFINITE)
                     .setAction(requireContext().getString(R.string.reload)) {
-                        if (error == ERROR_DATABASE_REMOVE) {
-                            libraryAdapter.notifyDataSetChanged()
-                        }
-                        else {
-                            libraryAdapter.submitList(null)
-                            viewModel.loadDatabase()
-                        }
+                        libraryAdapter.submitList(null)
+                        viewModel.loadDatabase()
                     }
                     .show()
             }

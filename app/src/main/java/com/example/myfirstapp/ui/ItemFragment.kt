@@ -15,16 +15,17 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavDirections
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.example.domain.entities.Book
+import com.example.domain.entities.Disk
+import com.example.domain.entities.LibraryItem
+import com.example.domain.entities.Newspaper
+import com.example.domain.types.DiskTypes
+import com.example.domain.types.ItemTypes
+import com.example.domain.types.Months
 import com.example.myfirstapp.R
-import com.example.myfirstapp.data.DiskTypes
-import com.example.myfirstapp.data.ItemTypes
-import com.example.myfirstapp.data.Months
 import com.example.myfirstapp.databinding.FragmentItemBinding
-import com.example.myfirstapp.library.Book
-import com.example.myfirstapp.library.Disk
-import com.example.myfirstapp.library.LibraryItem
-import com.example.myfirstapp.library.Newspaper
-import com.example.myfirstapp.viewmodels.LibraryRepository
+import com.example.myfirstapp.mappers.ResourceMapper
+import com.example.myfirstapp.viewmodels.ItemViewModel
 import com.example.myfirstapp.viewmodels.ViewModelFactory
 import com.google.android.material.snackbar.Snackbar
 import dev.androidbroadcast.vbpd.viewBinding
@@ -37,9 +38,10 @@ import kotlinx.coroutines.withContext
 class ItemFragment : Fragment() {
     private val binding: FragmentItemBinding by viewBinding(FragmentItemBinding::bind)
     private val args: ItemFragmentArgs by navArgs()
+    private val resourceMapper by lazy { ResourceMapper(requireContext()) }
     private val viewModel by lazy {
-        val repository = (requireActivity() as MainActivity).getRepository()
-        ViewModelProvider(this, ViewModelFactory(repository))[ItemViewModel::class.java]
+        val libraryUseCases = (requireActivity() as MainActivity).getLibraryUseCases
+        ViewModelProvider(this, ViewModelFactory(libraryUseCases))[ItemViewModel::class.java]
     }
     private val addMode by lazy {
         args.itemId == -1
@@ -118,7 +120,9 @@ class ItemFragment : Fragment() {
     }
 
     private fun setupSpinners() {
-        val typeNames = ItemTypes.getAllTypeNames(requireContext())
+        val typeNames = ItemTypes.getAllTypeNames().map {
+            resourceMapper.getItemTypeName(it)
+        }
         val typeNameAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, typeNames)
         typeNameAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.typeNameSpinner.adapter = typeNameAdapter
@@ -133,7 +137,9 @@ class ItemFragment : Fragment() {
         val diskTypeAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, diskTypes)
         diskTypeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        val months = Months.getAllMonths(requireContext())
+        val months = Months.getAllMonths().map {
+            resourceMapper.getMonthName(it)
+        }
         val monthsAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, months)
         monthsAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
@@ -147,7 +153,7 @@ class ItemFragment : Fragment() {
                 ) {
                     val newItemType = ItemTypes.entries[position]
                     with(binding) {
-                        itemIcon.setImageResource(newItemType.iconId)
+                        itemIcon.setImageResource(resourceMapper.getItemIcon(newItemType))
                         when (newItemType) {
                             ItemTypes.BOOK -> setupBookFields()
                             ItemTypes.NEWSPAPER -> {
@@ -232,8 +238,8 @@ class ItemFragment : Fragment() {
 
     private fun fillUniversalData(itemType: ItemTypes) {
         with(binding) {
-            itemIcon.setImageResource(itemType.iconId)
-            typeNameTextView.text = itemType.getTypeName(requireContext())
+            itemIcon.setImageResource(resourceMapper.getItemIcon(itemType))
+            typeNameTextView.text = resourceMapper.getItemTypeName(itemType)
             idTextView.text = args.itemId.toString()
             accessTextView.text = if (args.itemAccess) getString(R.string.access_true) else getString(R.string.access_false)
             nameTextView.text = args.itemName
@@ -256,7 +262,7 @@ class ItemFragment : Fragment() {
             parameter2Title.setText(R.string.monthOfPub)
             val monthOrdinal = args.parameter2?.toInt()
             val month = Months.entries[monthOrdinal!!]
-            param2TextView.text = month.getLocalName(requireContext())
+            param2TextView.text = resourceMapper.getMonthName(month)
         }
     }
 
@@ -357,7 +363,7 @@ class ItemFragment : Fragment() {
 
     private fun errorHandler(error: String?) {
         if (error != null) {
-            val errorMessage = LibraryRepository.errorMessages[error] ?: R.string.error_unknown
+            val errorMessage = resourceMapper.getErrorMessage(error)
             Snackbar.make(binding.root, errorMessage, Snackbar.LENGTH_SHORT)
                 .setAnchorView(binding.itemIcon)
                 .show()
